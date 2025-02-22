@@ -94,6 +94,8 @@ module ALU(
 	//logical_OR 	logical_or(A, B, or_result);
 	RCA 		add(A, B, add_result);
 	sub 	sub(A, B, sub_result);
+	neg 	neg(A, neg_result);
+	rightShift rightShift(A, B, shr_result);
 	
 //	booth 		mul(A, B, mul_result[31:0], mul_result[63:32]);
 //	division		div(A, B, div_result[31:0], div_result[63:32]);
