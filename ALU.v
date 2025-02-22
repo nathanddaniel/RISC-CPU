@@ -33,6 +33,7 @@ module ALU(
 				
 				Addition: begin // 3.3
 					Z[31:0] <= add_result[31:0];
+					Z[63:32] <= 32'd0;
 					
 				end
 				
@@ -91,7 +92,7 @@ module ALU(
 
 	logicalAND logicalAnd(A, B, and_result);
 //	logical_OR 	logical_or(A, B, or_result);
-//	adder 		add(A, B, add_result);
+	RCA 		add(A, B, add_result);
 //	subtractor 	sub(A, B, sub_result);
 //	booth 		mul(A, B, mul_result[31:0], mul_result[63:32]);
 //	division		div(A, B, div_result[31:0], div_result[63:32]);
