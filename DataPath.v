@@ -47,9 +47,9 @@ Bus bus(BusMuxInR0, BusMuxInR1, BusMuxInR2, BusMuxInR3, BusMuxInR4, BusMuxInR5, 
 	PCout, Zhighout, Zlowout, MDRout, R2out, R3out, R4out, R5out, R6out, R7out,
 	BusMuxOut);
 		
-ALU r1r2r3(clear, clock, opcode, BusMuxInR2, BusMuxInR3, BusMuxInZ);
-ALU r4r5(clear, clock, opcode, BusMuxInR4, BusMuxInR5, BusMuxInZlow, BusMuxInZhigh);
-ALU r6r7(clear, clock, opcode, BusMuxInR6, BusMuxInR7, BusMuxInZ);
+ALU r4r3r7(clear, clock, opcode, BusMuxInR3, BusMuxInR7, BusMuxInZ);
+//ALU r4r5(clear, clock, opcode, BusMuxInR4, BusMuxInR5, BusMuxInZlow, BusMuxInZhigh);
+//ALU r6r7(clear, clock, opcode, BusMuxInR6, BusMuxInR7, BusMuxInZ);
 
 	 
 endmodule

@@ -4,13 +4,13 @@ module ALU(
 	input wire [4:0] opcode,
 	input wire [31:0] A,
 	input wire [31:0] B,
-	output reg [31:0] Z,
+	output reg [63:0] Z,
 	output reg [31:0] Zhighout,
 	output reg [31:0] Zlowout
 );
 
-	parameter Logical_AND = 5'b01010, Logical_OR = 5'b01011, Addition = 5'b00011, Subtraction = 5'b00100, Multiply = 5'b01111, Division = 5'b10000,
-	Shift_R = 5'b00101, Shift_Right_A = 5'b00110, Shift_L = 5'b00111, Rotate_R = 5'b01000, Rotate_L = 5'b01001, Negate = 5'b10001, Not = 5'b10010;
+	parameter Logical_AND = 5'b00101, Logical_OR = 5'b00110, Addition = 5'b00011, Subtraction = 5'b00100, Multiply = 5'b10000, Division = 5'b01111,
+	Shift_R = 5'b01001, Shift_Right_A = 5'b01010, Shift_L = 5'b01011, Rotate_R = 5'b01000, Rotate_L = 5'b01000, Negate = 5'b10001, Not = 5'b10010;
 
 	wire [31:0] and_result, or_result, add_result, sub_result, shr_result, shra_result, shl_result, ror_result, rol_result, neg_result, not_result;
 	wire [63:0] mul_result, div_result;
@@ -22,6 +22,7 @@ module ALU(
 
 				Logical_AND: begin // 3.1
 					Z[31:0] <= and_result[31:0];
+					Z[63:32] <= 32'd0;
 					
 				end
 				

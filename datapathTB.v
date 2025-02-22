@@ -92,7 +92,7 @@ begin
 		end
 	
 		T0: begin
-				Mdatain <= 32'h00000007; 
+				Mdatain <= 32'h00000007; 		// opcode for NOP
 				PCin <= 1; MDRout <=1;
 				
 				#10 PCout<= 1; MARin <= 1; IncPC <= 1; 
@@ -100,7 +100,7 @@ begin
 		end
 		T1: begin
 				Mdatain <= 32'h2A1B8000;   // opcode for “and R4, R3, R7
-				Read <= 1; MDRin <= 1;
+				Read <= 1; MDRin <= 1;		// 0010 1010 0001 1011 1000 0000 0000 0000 (2A1B8000)
 				#10 Read <= 0; MDRin <= 0;
 				
 		end
@@ -109,16 +109,16 @@ begin
 				#10 MDRout<= 0; IRin <= 0; 
 		end
 		T3: begin
-				#10 R4out<= 1; Yin <= 1;  
-				#15 R4out<= 0; Yin <= 0;
+				#10 R7out<= 1; Yin <= 1;  
+				#15 R7out<= 0; Yin <= 0;
 		end
 		T4: begin
 				R3out<= 1; AND <= 5'b00101; ZLowIn <= 1; 
 				#25 R3out<= 0; ZLowIn <= 0; 
 		end
 		T5: begin
-				Zlowout<= 1; R7in <= 1; 
-				#25 Zlowout<= 0; R7in <= 0;
+				Zlowout<= 1; R4in <= 1; 
+				#25 Zlowout<= 0; R4in <= 0;
 		end
 	endcase
 end
