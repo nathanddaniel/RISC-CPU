@@ -10,7 +10,7 @@ module ALU(
 );
 
 	parameter Logical_AND = 5'b00101, Logical_OR = 5'b00110, Addition = 5'b00011, Subtraction = 5'b00100, Multiply = 5'b10000, Division = 5'b01111,
-	Shift_R = 5'b01001, Shift_Right_A = 5'b01010, Shift_L = 5'b01011, Rotate_R = 5'b01000, Rotate_L = 5'b01000, Negate = 5'b10001, Not = 5'b10010;
+	Shift_R = 5'b01001, Shift_Right_A = 5'b01010, Shift_L = 5'b01011, Rotate_R = 5'b00111, Rotate_L = 5'b01000, Negate = 5'b10001, Not = 5'b10010;
 
 	wire [31:0] and_result, or_result, add_result, sub_result, shr_result, shra_result, shl_result, ror_result, rol_result, neg_result, not_result;
 	wire [63:0] mul_result, div_result;
@@ -96,13 +96,13 @@ module ALU(
 	sub 	sub(A, B, sub_result);
 	neg 	neg(A, neg_result);
 	rightShift rightShift(A, B, shr_result);
+	rightShiftA rightShiftA(A, B, shra_result);
+	leftShift leftShift(A, B, shl_result);
+	rightRotate rightRotate(A, B, ror_result);
+	leftRotate leftRotate(A, B, rol_result);
 	
 //	booth 		mul(A, B, mul_result[31:0], mul_result[63:32]);
 //	division		div(A, B, div_result[31:0], div_result[63:32]);
-//	ShiftRight 	shr(A, B, shr_result);
-//	ShiftRightA shra(A, B, shra_result);
-//	ShiftLeft 	shl(A, B, shl_result);
-//	RotateRight ror(A, B, ror_result);
 //	RotateLeft 	rol(A, B, rol_result);
 //	negate 		neg(B, neg_result);
 //	logical_NOT logical_not(B, not_result);
