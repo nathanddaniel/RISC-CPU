@@ -1,9 +1,9 @@
 `timescale 1ns / 10ps
-module datapathTB_ROR; 	
+module datapathTB_LSHIFT; 	
 	reg	PCout, ZHighout, Zlowout, MDRout, R2out, R3out, R4out, R5out, R6out, R7out;
 	reg	MARin, PCin, MDRin, IRin, Yin;
 	reg 	IncPC, Read;
-	reg 	[4:0] ROR; 
+	reg 	[4:0] LSHIFT; 
 	reg 	R1in, R2in, R3in;
 	reg   R4in, R5in, R6in, R7in, R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in;
 	reg	HIin, LOin, ZHighIn, ZLowIn, Cin;
@@ -20,7 +20,7 @@ initial Clear = 0;
 DataPath DUT(PCout, ZHighout, Zlowout, MDRout, R2out, R3out, R4out, R5out, R6out, R7out,
 					MARin, PCin, MDRin, IRin, Yin, 
 					IncPC, Read, 
-					ROR,
+					LSHIFT,
 					R1in, R2in, R3in, R4in, R5in, R6in, R7in, R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in, 
 					HIin, LOin, ZHighIn, ZLowIn, Cin,
 					Clock, Clear, 
@@ -57,7 +57,7 @@ begin
 				PCout <= 0;   Zlowout <= 0; ZHighout <= 0;  MDRout<= 0;
 				R2out <= 0;   R3out <= 0;   MARin <= 0;   ZLowIn <= 0;  
 				PCin <=0;   MDRin <= 0;   IRin  <= 0;   Yin <= 0;  
-				IncPC <= 0;   Read <= 0;   ROR <= 0;
+				IncPC <= 0;   Read <= 0;   LSHIFT <= 0;
 				R1in <= 0; R2in <= 0; R3in <= 0; Mdatain <= 32'h00000000;
 		end
 		Reg_load1a: begin 
@@ -97,8 +97,8 @@ begin
 				#10 PCin <= 0; MDRout <=0; PCout<= 0; MARin <= 0; IncPC <= 0;
 		end
 		T1: begin
-				Mdatain <= 32'h3A1B8000;   // opcode for "ror R4, R3, R7"
-				Read <= 1; MDRin <= 1;		// 0011 1010 0001 1011 1000 0000 0000 0000 (3A1B8000)
+				Mdatain <= 32'h5A1B8000;   // opcode for "shl R4, R3, R7"
+				Read <= 1; MDRin <= 1;		// 0101 1010 0001 1011 1000 0000 0000 0000 (5A1B8000)
 				#10 Read <= 0; MDRin <= 0;
 				
 		end
@@ -111,7 +111,7 @@ begin
 				#15 R7out<= 0; Yin <= 0;
 		end
 		T4: begin
-				R3out<= 1; ROR <= 5'b00111; ZLowIn <= 1; 
+				R3out<= 1; LSHIFT <= 5'b01011; ZLowIn <= 1; 
 				#25 R3out<= 0; ZLowIn <= 0; 
 		end
 		T5: begin

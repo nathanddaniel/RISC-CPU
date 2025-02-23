@@ -87,6 +87,12 @@ module ALU(
 					
 				end
 				
+				default: begin
+					Z      <= 64'd0;
+					Zhighout <= 32'd0;
+					Zlowout  <= 32'd0;
+				end
+				
 			endcase
 	end
 
@@ -100,10 +106,9 @@ module ALU(
 	rightRotate rightRotate(A, B, ror_result);
 	leftRotate leftRotate(A, B, rol_result);
 	neg	neg(A, neg_result);
+	not_operation 	not_operation(A, not_result);
+	//booth 		mul(A, B, mul_result[31:0], mul_result[63:32]);
 	
-//	booth 		mul(A, B, mul_result[31:0], mul_result[63:32]);
-//	division		div(A, B, div_result[31:0], div_result[63:32]);
-//	logical_NOT logical_not(B, not_result);
-
+	div		div(A, B, div_result[31:0], div_result[63:32]);
 
 endmodule
