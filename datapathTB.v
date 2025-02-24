@@ -17,58 +17,14 @@ reg	[3:0] Present_state= Default;
 
 initial Clear = 0;
 
-DataPath DUT (
-        .PCout      (PCout),
-        .Zhighout   (ZHighout),
-        .Zlowout    (Zlowout),
-        .MDRout     (MDRout),
-
-        .R0out      (R0out),
-        .R2out      (R2out),
-        .R3out      (R3out),
-        .R4out      (R4out),
-        .R5out      (R5out),
-        .R6out      (R6out),
-        .R7out      (R7out),
-
-        .MARin      (MARin),
-        .PCin       (PCin),
-        .MDRin      (MDRin),
-        .IRin       (IRin),
-        .Yin        (Yin),
-        .IncPC      (IncPC),
-        .Read       (Read),
-
-        .opcode     (AND),   // 5-bit opcode
-
-        .R0in       (R0in),
-        .R1in       (R1in),
-        .R2in       (R2in),
-        .R3in       (R3in),
-        .R4in       (R4in),
-        .R5in       (R5in),
-        .R6in       (R6in),
-        .R7in       (R7in),
-        .R8in       (R8in),
-        .R9in       (R9in),
-        .R10in      (R10in),
-        .R11in      (R11in),
-        .R12in      (R12in),
-        .R13in      (R13in),
-        .R14in      (R14in),
-        .R15in      (R15in),
-
-        .HIin       (HIin),
-        .LOin       (LOin),
-        .ZHighIn    (ZHighIn),
-        .ZLowIn     (ZLowIn),
-        .Cin        (Cin),
-
-        .clock      (Clock),
-        .clear      (Clear),
-        .Mdatain    (Mdatain)
-    );
-// add test logic here
+DataPath DUT(PCout, ZHighout, Zlowout, MDRout, R2out, R3out, R4out, R5out, R6out, R7out,
+					MARin, PCin, MDRin, IRin, Yin, 
+					IncPC, Read, 
+					AND,
+					R1in, R2in, R3in, R4in, R5in, R6in, R7in, R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in, 
+					HIin, LOin, ZHighIn, ZLowIn, Cin,
+					Clock, Clear, 
+					Mdatain);
 
 initial 
 	begin
@@ -141,7 +97,7 @@ begin
 				#10 PCin <= 0; MDRout <=0; PCout<= 0; MARin <= 0; IncPC <= 0;
 		end
 		T1: begin
-				Mdatain <= 32'h2A1B8000;   // opcode for “and R4, R3, R7
+				Mdatain <= 32'h2A1B8000;   // opcode for "and R4, R3, R7"
 				Read <= 1; MDRin <= 1;		// 0010 1010 0001 1011 1000 0000 0000 0000 (2A1B8000)
 				#10 Read <= 0; MDRin <= 0;
 				
