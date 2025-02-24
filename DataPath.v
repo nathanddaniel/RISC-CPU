@@ -46,11 +46,11 @@ mdr mdr(clear, clock, MDRin, Read, BusMuxOut, Mdatain, BusMuxInMDR);
 Bus bus(BusMuxInR0, BusMuxInR1, BusMuxInR2, BusMuxInR3, BusMuxInR4, BusMuxInR5, BusMuxInR6, BusMuxInR7, BusMuxInR8, 
 	BusMuxInR9, BusMuxInR10, BusMuxInR11, BusMuxInR12, BusMuxInR13, BusMuxInR14, BusMuxInR15, 
 	BusMuxInHI, BusMuxInLO, BusMuxInY, BusMuxInZhigh, BusMuxInZlow, BusMuxInPC, BusMuxInMDR, BusMuxIn_InPort, BusMuxInCsignextended,
-	PCout, Zhighout, Zlowout, MDRout, R0out, R2out, R3out, R4out, R5out, R6out, R7out,
+	PCout, Zhighout, Zlowout, MDRout, R0out, R2out, R3out, R4out, R5out, R6out, R7out, HIout, LOout,
 	BusMuxOut);
 		
 //ALU r4r3r7(clear, clock, opcode, BusMuxInR3, BusMuxInR7, BusMuxInZ);
-//ALU r2r6(clear, clock, opcode, BusMuxInR2, BusMuxInR6, BusMuxInZlow, BusMuxInZhigh);
+//ALU r2r6(clear, clock, opcode, BusMuxInR2, BusMuxInR6, BusMuxInZ);
 //ALU r5r0(clear, clock, opcode, BusMuxInR0, 32'b0, BusMuxInZ);
 
 
