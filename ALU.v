@@ -48,8 +48,8 @@ module ALU(
 				end
 				
 				Division: begin // 3.6
-					Zlow[31:0] <= div_result[31:0];
-					Zhigh[31:0] <= div_result[63:32];
+					Z[31:0] <= div_result[31:0];
+					Z[63:32] <= div_result[63:32];
 				end
 				
 				Shift_R: begin // 3.7
@@ -95,7 +95,7 @@ module ALU(
 	RCA 		add(A, B, add_result);
 //	subtractor 	sub(A, B, sub_result);
 	booth_multiplier 		mul(A, B, mul_result);
-//	division		div(A, B, div_result[31:0], div_result[63:32]);
+	division		div(A, B, div_result);
 //	ShiftRight 	shr(A, B, shr_result);
 //	ShiftRightA shra(A, B, shra_result);
 //	ShiftLeft 	shl(A, B, shl_result);
