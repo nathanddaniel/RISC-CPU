@@ -4,7 +4,7 @@ module Bus (
 	BusMuxInR9, BusMuxInR10, BusMuxInR11, BusMuxInR12, BusMuxInR13, BusMuxInR14, BusMuxInR15, 
 	BusMuxInHI, BusMuxInLO, BusMuxInY, BusMuxInZhigh, BusMuxInZlow, BusMuxInPC, BusMuxInMDR, BusMuxIn_InPort, BusMuxInCsignextended,
 	//Encoder
-	input PCout, Zhighout, Zlowout, MDRout, R2out, R3out, R4out, R5out, R6out, R7out,
+	input PCout, Zhighout, Zlowout, MDRout, R0out, R2out, R3out, R4out, R5out, R6out, R7out,
 	
 	output wire [31:0]BusMuxOut
 );
@@ -16,6 +16,7 @@ always @ (*) begin
 	if(Zhighout) q = BusMuxInZhigh;
 	if(Zlowout) q = BusMuxInZlow;
 	if(MDRout) q = BusMuxInMDR;
+	if(R0out) q = BusMuxInR0;
 	if(R2out) q = BusMuxInR2;
 	if(R3out) q = BusMuxInR3;
 	if(R4out) q = BusMuxInR4;
@@ -26,4 +27,3 @@ always @ (*) begin
 end
 assign BusMuxOut = q;
 endmodule
-

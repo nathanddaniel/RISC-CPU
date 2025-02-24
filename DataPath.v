@@ -1,10 +1,12 @@
 module DataPath(
-	input PCout, Zhighout, Zlowout, MDRout, R2out, R3out, R4out, R5out, R6out, R7out,
+	input PCout, Zhighout, Zlowout, MDRout, 
+	input R0out, R2out, R3out, R4out, R5out, R6out, R7out,
 	input MARin, PCin, MDRin, IRin, Yin, 
 	input IncPC, Read, 
 	input wire [4:0] opcode,
-	input R1in, R2in, R3in, 
-	input R4in, R5in, R6in, R7in, R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in, 
+	input R0in, R1in, R2in, R3in, 
+	input R4in, R5in, R6in, R7in, 
+	input R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in, 
 	input HIin, LOin, ZHighIn, ZLowIn, Cin,
 	input clock, clear, 
 	input [31:0] Mdatain
@@ -44,12 +46,13 @@ mdr mdr(clear, clock, MDRin, Read, BusMuxOut, Mdatain, BusMuxInMDR);
 Bus bus(BusMuxInR0, BusMuxInR1, BusMuxInR2, BusMuxInR3, BusMuxInR4, BusMuxInR5, BusMuxInR6, BusMuxInR7, BusMuxInR8, 
 	BusMuxInR9, BusMuxInR10, BusMuxInR11, BusMuxInR12, BusMuxInR13, BusMuxInR14, BusMuxInR15, 
 	BusMuxInHI, BusMuxInLO, BusMuxInY, BusMuxInZhigh, BusMuxInZlow, BusMuxInPC, BusMuxInMDR, BusMuxIn_InPort, BusMuxInCsignextended,
-	PCout, Zhighout, Zlowout, MDRout, R2out, R3out, R4out, R5out, R6out, R7out,
+	PCout, Zhighout, Zlowout, MDRout, R0out, R2out, R3out, R4out, R5out, R6out, R7out,
 	BusMuxOut);
 		
-ALU r4r3r7(clear, clock, opcode, BusMuxInR3, BusMuxInR7, BusMuxInZ);
-//ALU r4r5(clear, clock, opcode, BusMuxInR4, BusMuxInR5, BusMuxInZlow, BusMuxInZhigh);
-//ALU r6r7(clear, clock, opcode, BusMuxInR6, BusMuxInR7, BusMuxInZ);
+//ALU r4r3r7(clear, clock, opcode, BusMuxInR3, BusMuxInR7, BusMuxInZ);
+//ALU r2r6(clear, clock, opcode, BusMuxInR2, BusMuxInR6, BusMuxInZlow, BusMuxInZhigh);
+//ALU r5r0(clear, clock, opcode, BusMuxInR0, 32'b0, BusMuxInZ);
+
 
 	 
 endmodule
