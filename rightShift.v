@@ -1,6 +1,6 @@
 module rightShift (
     input wire [31:0] A, 
-    input wire [4:0] B, // B is limited to 5 bits to ensure shift amount is within 0-31
+    input wire [4:0] B, // B is limited to 5 bits (0-31)
     output wire [31:0] result
 );
     genvar i;

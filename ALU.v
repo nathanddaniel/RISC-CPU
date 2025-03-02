@@ -103,12 +103,12 @@ module ALU(
 	booth_multiplier 		mul(A, B, mul_result);
 	division		div(A, B, div_result);
 	rightShift rightShift(A, B, shr_result);
-//	rightShiftA rightShiftA(A, B, shra_result);
-//	leftShift leftShift(A, B, shl_result);
+	rightShiftA rightShiftA(A, B, shra_result);
+	leftShift leftShift(A, B, shl_result);
 	rightRotate rightRotate(A, B, ror_result);
-//	leftRotate leftRotate(A, B, rol_result);
+	leftRotate leftRotate(A, B, rol_result);
 	neg	neg(A, neg_result);
-//	not_operation 	not_operation(A, not_result);
+	not_operation 	not_operation(A, not_result);
 
 
 endmodule
