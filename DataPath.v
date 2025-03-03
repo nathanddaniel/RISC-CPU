@@ -99,9 +99,7 @@ module DataPath(
       .opcode(opcode),
       .A     (BusMuxInY),     // 1st operand from Y register
       .B     (BusMuxOut),     // 2nd operand from system bus
-      .Z     (BusMuxInZ),     // 64-bit result
-      .Zhigh (),
-      .Zlow  ()
+      .Z     (BusMuxInZ)     // 64-bit result
   );
 
 endmodule

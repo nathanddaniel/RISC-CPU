@@ -4,9 +4,7 @@ module ALU(
 	input wire [4:0] opcode,
 	input wire [31:0] A,
 	input wire [31:0] B,
-	output reg [63:0] Z,
-	output reg [31:0] Zhigh, //implement later if needed
-	output reg [31:0] Zlow	
+	output reg [63:0] Z
 );
 
 	parameter Logical_AND = 5'b00101, Logical_OR = 5'b00110, Addition = 5'b00011, Subtraction = 5'b00100, Multiply = 5'b10000, Division = 5'b01111,
@@ -69,6 +67,7 @@ module ALU(
 
 				Rotate_R: begin // 3.10
 					Z[31:0] <= ror_result[31:0];
+					Z[63:32] <= 32'd0;
 					
 				end
 	
@@ -89,8 +88,6 @@ module ALU(
 				
 				default: begin
 					Z      <= 64'd0;
-					Zhigh <= 32'd0;
-					Zlow  <= 32'd0;
 				end
 				
 			endcase
