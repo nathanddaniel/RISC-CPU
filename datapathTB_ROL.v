@@ -150,12 +150,12 @@ begin
 				#10 MDRout<= 0; IRin <= 0; 
 		end
 		T3: begin
-				#10 R7out<= 1; Yin <= 1;  
-				#15 R7out<= 0; Yin <= 0;
+				#10 R3out<= 1; Yin <= 1;  
+				#15 R3out<= 0; Yin <= 0;
 		end
 		T4: begin
-				R3out<= 1; ROL <= 5'b01000; ZLowIn <= 1; 
-				#25 R3out<= 0; ZLowIn <= 0; 
+				R7out<= 1; ROL <= 5'b01000; ZLowIn <= 1; 
+				#25 R7out<= 0; ZLowIn <= 0; 
 		end
 		T5: begin
 				Zlowout<= 1; R4in <= 1; 

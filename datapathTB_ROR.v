@@ -1,14 +1,23 @@
 `timescale 1ns / 10ps
-module datapathTB_ROR; 	
-	reg	PCout, ZHighout, Zlowout, MDRout, R2out, R3out, R4out, R5out, R6out, R7out;
-	reg	MARin, PCin, MDRin, IRin, Yin;
-	reg 	IncPC, Read;
-	reg 	[4:0] ROR; 
-	reg 	R1in, R2in, R3in;
-	reg   R4in, R5in, R6in, R7in, R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in;
-	reg	HIin, LOin, ZHighIn, ZLowIn, Cin;
-	reg	Clock, Clear;	
-	reg	[31:0] Mdatain;
+module datapathTB_ROR; 
+    reg PCout, ZHighout, Zlowout, MDRout;
+    reg R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out;
+    // If you have R8out..R15out as well, declare them:
+    // reg R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out;
+
+    // Register/control write signals
+    reg MARin, PCin, MDRin, IRin, Yin;
+    reg IncPC, Read;
+    reg [4:0] ROR;  // Our opcode
+
+    reg R0in, R1in, R2in, R3in;
+    reg R4in, R5in, R6in, R7in;
+    // If you need them:
+    // reg R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in;
+    
+    reg HIin, LOin, ZHighIn, ZLowIn, Cin;
+    reg Clock, Clear;
+    reg [31:0] Mdatain;
 
 parameter	Default = 4'b0000, Reg_load1a= 4'b0001, Reg_load1b= 4'b0010,
 					Reg_load2a= 4'b0011, Reg_load2b = 4'b0100, Reg_load3a = 4'b0101,
@@ -24,12 +33,14 @@ DataPath DUT (
         .MDRout     (MDRout),
 
         .R0out      (R0out),
+        .R1out      (R1out),
         .R2out      (R2out),
         .R3out      (R3out),
         .R4out      (R4out),
         .R5out      (R5out),
         .R6out      (R6out),
         .R7out      (R7out),
+        // If needed: .R8out(...), R9out, etc.
 
         .MARin      (MARin),
         .PCin       (PCin),
@@ -39,7 +50,7 @@ DataPath DUT (
         .IncPC      (IncPC),
         .Read       (Read),
 
-        .opcode     (ROR),   // 5-bit opcode
+        .opcode     (ROR),
 
         .R0in       (R0in),
         .R1in       (R1in),
@@ -49,14 +60,7 @@ DataPath DUT (
         .R5in       (R5in),
         .R6in       (R6in),
         .R7in       (R7in),
-        .R8in       (R8in),
-        .R9in       (R9in),
-        .R10in      (R10in),
-        .R11in      (R11in),
-        .R12in      (R12in),
-        .R13in      (R13in),
-        .R14in      (R14in),
-        .R15in      (R15in),
+        // If needed: .R8in(...), R9in, etc.
 
         .HIin       (HIin),
         .LOin       (LOin),
@@ -150,12 +154,13 @@ begin
 				#10 MDRout<= 0; IRin <= 0; 
 		end
 		T3: begin
-				#10 R7out<= 1; Yin <= 1;  
-				#15 R7out<= 0; Yin <= 0;
+				#10 R3out<= 1; Yin <= 1;  
+				#15 R3out<= 0; Yin <= 0;
 		end
 		T4: begin
-				R3out<= 1; ROR <= 5'b00111; ZLowIn <= 1; 
-				#25 R3out<= 0; ZLowIn <= 0; 
+				R7out<= 1; 
+				ROR <= 5'b00111; ZLowIn <= 1; 
+				#25 R7out<= 0; ZLowIn <= 0; 
 		end
 		T5: begin
 				Zlowout<= 1; R4in <= 1; 

@@ -1,11 +1,9 @@
 module DataPath(
-    // These are the signals that also appear in Bus.v
     input PCout, Zhighout, Zlowout, MDRout,
     input R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
     input R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
     input HIout, LOout, Yout, InPortout, CSignOut,
 
-    // CPU control signals for writing into registers, etc.
     input MARin, PCin, MDRin, IRin, Yin,
     input IncPC, Read,
     input [4:0] opcode,
@@ -14,17 +12,13 @@ module DataPath(
     input R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in,
     input HIin, LOin, ZHighIn, ZLowIn, Cin,
 
-    // Standard clock/reset lines
     input clock, clear,
 
-    // Data input from external memory
     input [31:0] Mdatain
 );
 
-  // 64-bit ALU result bus
   wire [63:0] BusMuxInZ;
 
-  // 32-bit wires for internal register data
   wire [31:0] BusMuxInR0, BusMuxInR1, BusMuxInR2, BusMuxInR3;
   wire [31:0] BusMuxInR4, BusMuxInR5, BusMuxInR6, BusMuxInR7;
   wire [31:0] BusMuxInR8, BusMuxInR9, BusMuxInR10, BusMuxInR11;
@@ -34,9 +28,6 @@ module DataPath(
   wire [31:0] BusMuxInPC, BusMuxInMDR, BusMuxIn_InPort, BusMuxInCsignextended;
   wire [31:0] BusMuxOut;
 
-  // ------------------------------------------------
-  //  Register Instantiations
-  // ------------------------------------------------
   register r0  (clear, clock, R0in,  BusMuxOut, BusMuxInR0);
   register r1  (clear, clock, R1in,  BusMuxOut, BusMuxInR1);
   register r2  (clear, clock, R2in,  BusMuxOut, BusMuxInR2);
@@ -57,22 +48,16 @@ module DataPath(
   register HI  (clear, clock, HIin,  BusMuxOut, BusMuxInHI);
   register LO  (clear, clock, LOin,  BusMuxOut, BusMuxInLO);
 
-  // "Y" register holds first ALU operand
   register Y   (clear, clock, Yin,   BusMuxOut, BusMuxInY);
 
-  // Z registers hold 64-bit ALU result
   register Zhigh (clear, clock, ZHighIn, BusMuxInZ[63:32], BusMuxInZhigh);
   register Zlow  (clear, clock, ZLowIn,  BusMuxInZ[31:0],  BusMuxInZlow);
 
-  // PC and MDR
   ProgramCounter PC_inst (clock, PCin, IncPC, BusMuxOut, BusMuxInPC);
   mdr           mdr_i    (clear, clock, MDRin, Read, BusMuxOut, Mdatain, BusMuxInMDR);
 
-  // ------------------------------------------------
-  //  The System Bus
-  // ------------------------------------------------
   Bus bus (
-    // 32-bit inputs
+
     BusMuxInR0, BusMuxInR1, BusMuxInR2, BusMuxInR3, 
     BusMuxInR4, BusMuxInR5, BusMuxInR6, BusMuxInR7,
     BusMuxInR8, BusMuxInR9, BusMuxInR10, BusMuxInR11,
@@ -80,26 +65,21 @@ module DataPath(
     BusMuxInHI, BusMuxInLO, BusMuxInY, BusMuxInZhigh, BusMuxInZlow,
     BusMuxInPC, BusMuxInMDR, BusMuxIn_InPort, BusMuxInCsignextended,
 
-    // Control signals that select which input drives BusMuxOut:
     PCout, Zhighout, Zlowout, MDRout,
     R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
     R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
     HIout, LOout, Yout, InPortout, CSignOut,
 
-    // 32-bit bus output
     BusMuxOut
   );
 
-  // ------------------------------------------------
-  //  Single ALU Instantiation
-  // ------------------------------------------------
   ALU main_alu (
       .clear (clear),
       .clock (clock),
       .opcode(opcode),
-      .A     (BusMuxInY),     // 1st operand from Y register
-      .B     (BusMuxOut),     // 2nd operand from system bus
-      .Z     (BusMuxInZ)     // 64-bit result
+      .A     (BusMuxInY),     
+      .B     (BusMuxOut),     
+      .Z     (BusMuxInZ)
   );
 
 endmodule
