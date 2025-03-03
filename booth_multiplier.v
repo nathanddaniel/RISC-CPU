@@ -1,41 +1,34 @@
 module booth_multiplier (
-    input signed [31:0] a, b,
-    output [63:0] Z
+    input  wire signed [31:0] a,  // Multiplicand (signed 32-bit)
+    input  wire signed [31:0] b,  // Multiplier  (signed 32-bit)
+    output reg  signed [63:0] Z   // 64-bit product (hi:lo)
 );
-    reg [2:0] cc[15:0];              
-    reg [33:0] pp[15:0];             
-    reg signed [63:0] spp[15:0];     
-    reg signed [63:0] product;       
-
-    integer i, j;
-
-    wire signed [32:0] inv_a;
-    assign inv_a = {~a[31], ~a} + 1;  
+    reg signed [31:0] A;  
+    reg signed [31:0] Q;  
+    reg               Q_m1;  // Extra bit: Q-1
+    reg signed [31:0] M;     // Copy of 'a'
+    integer i;
 
     always @(*) begin
-        
-        cc[0] = {b[1], b[0], 1'b0}; 
-        for (j = 1; j < 16; j = j + 1) 
-            cc[j] = {b[2*j+1], b[2*j], b[2*j-1]}; 
-        
-        for (j = 0; j < 16; j = j + 1) begin
-            case (cc[j])
-                3'b001, 3'b010: pp[j] = {a[31], a};       
-                3'b011:         pp[j] = {a, 1'b0};        
-                3'b100:         pp[j] = {inv_a[31:0], 1'b0}; 
-                3'b101, 3'b110: pp[j] = inv_a;            
-                default:        pp[j] = 34'b0;            
+        A    = 32'd0;  // High half
+        Q    = b;      // Low half
+        Q_m1 = 1'b0;   // Q-1
+        M    = a;
+
+        // Perform 32 iterations
+        for (i = 0; i < 32; i = i + 1) begin
+            case ({Q[0], Q_m1})
+                2'b01: A = A + M;
+                2'b10: A = A - M;
+                default: ;          // 00 or 11 => do nothing
             endcase
 
-            spp[j] = $signed(pp[j]);   
-            spp[j] = spp[j] << (2 * j); 
+            // Save old Q[0] into Q_m1 BEFORE shifting
+            Q_m1 = Q[0];
+
+            // Arithmetic shift right the entire 65-bit structure {A,Q,Q_m1}
+            {A, Q} = { {A[31], A}, Q } >>> 1;
         end
-
-        product = spp[0];
-        for (j = 1; j < 16; j = j + 1)
-            product = product + spp[j];
+        Z = {A, Q};
     end
-
-    assign Z = product;
-
 endmodule
