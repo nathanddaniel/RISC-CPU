@@ -1,32 +1,18 @@
 module Bus (
-    //--------------------------------------------------------------------------
-    // 32-bit data inputs from each register and special-purpose register
-    //--------------------------------------------------------------------------
     input wire [31:0] BusMuxInR0, BusMuxInR1, BusMuxInR2, BusMuxInR3, BusMuxInR4, BusMuxInR5, BusMuxInR6, BusMuxInR7,  
                       BusMuxInR8, BusMuxInR9, BusMuxInR10, BusMuxInR11, BusMuxInR12, BusMuxInR13, BusMuxInR14, BusMuxInR15, 
                       BusMuxInHI, BusMuxInLO, BusMuxInY, BusMuxInZhigh, BusMuxInZlow, BusMuxInPC, BusMuxInMDR, 
                       BusMuxIn_InPort, BusMuxInCsignextended,
 
-    //--------------------------------------------------------------------------
-    // Control signals: exactly one is asserted to select which data
-    // goes onto the bus (BusMuxOut).
-    //--------------------------------------------------------------------------
     input wire PCout, Zhighout, Zlowout, MDRout, R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,  
                R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out, HIout, LOout, Yout, InPortout, CSignOut,
 
-    //--------------------------------------------------------------------------
-    // 32-bit output: the system bus
-    //--------------------------------------------------------------------------
     output wire [31:0] BusMuxOut
 );
 
-    // We use an internal 32-bit register to hold the bus output.
     reg [31:0] q;
 
-    // Combinational logic: on every change of inputs,
-    // select exactly one input to drive the bus.
     always @(*) begin
-        // Default to zero (in case no control signals are asserted)
         q = 32'd0;
 
         if      (PCout)       q = BusMuxInPC;
@@ -56,7 +42,6 @@ module Bus (
         else if (CSignOut)    q = BusMuxInCsignextended;
     end
 
-    // Connect the internal register to the external bus output
     assign BusMuxOut = q;
 
 endmodule
