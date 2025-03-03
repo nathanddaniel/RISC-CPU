@@ -1,9 +1,10 @@
 module DataPath(
+    // Control signals to select the bus output
     input PCout, Zhighout, Zlowout, MDRout,
     input R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
     input R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
     input HIout, LOout, Yout, InPortout, CSignOut,
-
+    // Control signals for selecting/enabling regs
     input MARin, PCin, MDRin, IRin, Yin,
     input IncPC, Read,
     input [4:0] opcode,
@@ -16,7 +17,7 @@ module DataPath(
 
     input [31:0] Mdatain
 );
-
+  // All register declarations:
   wire [63:0] BusMuxInZ;
 
   wire [31:0] BusMuxInR0, BusMuxInR1, BusMuxInR2, BusMuxInR3;
@@ -55,7 +56,7 @@ module DataPath(
 
   ProgramCounter PC_inst (clock, PCin, IncPC, BusMuxOut, BusMuxInPC);
   mdr           mdr_i    (clear, clock, MDRin, Read, BusMuxOut, Mdatain, BusMuxInMDR);
-
+  // Bus Mux instantiation
   Bus bus (
 
     BusMuxInR0, BusMuxInR1, BusMuxInR2, BusMuxInR3, 
@@ -72,14 +73,14 @@ module DataPath(
 
     BusMuxOut
   );
-
+  // ALU instantiation
   ALU main_alu (
       .clear (clear),
       .clock (clock),
       .opcode(opcode),
-      .A     (BusMuxInY),     
-      .B     (BusMuxOut),     
-      .Z     (BusMuxInZ)
+      .A     (BusMuxInY),  // Operand A recieves value from reg Y   
+      .B     (BusMuxOut),  // Operand B recieves value from bus  
+      .Z     (BusMuxInZ)   // Result is stored in reg Z
   );
 
 endmodule

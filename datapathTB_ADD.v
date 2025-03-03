@@ -1,22 +1,24 @@
 `timescale 1ns / 10ps
-module datapathTB_ADD; 	
+module datapathTB_ADD; 
+	// Register declarations for control signals	
 	reg	PCout, ZHighout, Zlowout, MDRout, R2out, R3out, R4out, R5out, R6out, R7out;
 	reg	MARin, PCin, MDRin, IRin, Yin;
 	reg 	IncPC, Read;
-	reg 	[4:0] ADD; 
+	reg 	[4:0] ADD; // Opcode signal
 	reg 	R1in, R2in, R3in;
 	reg   R4in, R5in, R6in, R7in, R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in;
 	reg	HIin, LOin, ZHighIn, ZLowIn, Cin;
 	reg	Clock, Clear;	
 	reg	[31:0] Mdatain;
 
+// State definitions for FSM
 parameter	Default = 4'b0000, Reg_load1a= 4'b0001, Reg_load1b= 4'b0010,
 					Reg_load2a= 4'b0011, Reg_load2b = 4'b0100, Reg_load3a = 4'b0101,
 					Reg_load3b = 4'b0110, T0= 4'b0111, T1= 4'b1000,T2= 4'b1001, T3= 4'b1010, T4= 4'b1011, T5= 4'b1100;
 reg	[3:0] Present_state= Default;
 
 initial Clear = 0;
-
+// Instantiate the datapath module
 DataPath DUT (
         .PCout      (PCout),
         .Zhighout   (ZHighout),
@@ -68,14 +70,13 @@ DataPath DUT (
         .clear      (Clear),
         .Mdatain    (Mdatain)
     );
-// add test logic here
 
 initial 
 	begin
 		Clock = 0;
 		forever #10 Clock = ~ Clock;
 end
-
+// State tranisiton logic:
 always @(posedge Clock)
 begin
 	case (Present_state)
@@ -94,9 +95,11 @@ begin
 		endcase
 	end
 
+// Control signal logic based on each state
 always @(Present_state)
 begin
 	case (Present_state)
+		// Default is reset all control signals
 		Default: begin
 				PCout <= 0;   Zlowout <= 0; ZHighout <= 0;  MDRout<= 0;
 				R2out <= 0;   R3out <= 0;   MARin <= 0;   ZLowIn <= 0;  
@@ -104,6 +107,7 @@ begin
 				IncPC <= 0;   Read <= 0;   ADD <= 0;
 				R1in <= 0; R2in <= 0; R3in <= 0; Mdatain <= 32'h00000000;
 		end
+		// Load correct values into registers
 		Reg_load1a: begin 
 				Mdatain<= 32'h00000012;
 				Read = 0; MDRin = 0;	
@@ -132,7 +136,7 @@ begin
 				#10 MDRout<= 1; R7in <= 1;  
 				#15 MDRout<= 0; R7in <= 0;		// initialize R7 with the value 0x01 (0000 0001)
 		end
-	
+		// ADD operation Execution: add R4, R3, R7 (Result: 1000 0000)
 		T0: begin
 				Mdatain <= 32'h00000007; 
 				PCin <= 1; MDRout <=1;
