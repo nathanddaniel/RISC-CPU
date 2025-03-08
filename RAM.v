@@ -18,15 +18,15 @@ module RAM (
 	
 	always @ (posedge clock) begin
 	
-		if (read) begin
-			//if read signal is high we will read data from that address
-			data_output <= ram[address];
-		end
-			
-		else if (write) begin
+		if (write) begin
 		
 			//if write signal is high, we will write data to that address
 			ram[address] <= data;
+		end
+		
+		else if (read) begin
+			//if read signal is high we will read data from that address
+			data_output <= ram[address];
 		end
 	end
 	

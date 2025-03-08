@@ -9,15 +9,16 @@ module mdr(
 	
 	always @ (posedge clock) begin
 		
-		if (clear)
+		if (clear) begin
 			//if clear is active, reset MDR
 			q <= 32'b0;
+		end
 		
 		else if (MDRin) begin
 		
 			if (read) begin
 				//reading from the RAM
-				q <= Mdatain
+				q <= Mdatain;
 			end
 			
 			else 
