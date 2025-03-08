@@ -21,6 +21,6 @@ module MAR(
 	end 
 	
 	//outputting the lower 9 bits for RAM addressing later on
-	assign address = q[8:0]
+	assign address = q[8:0];
 	
 endmodule		
