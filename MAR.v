@@ -1,3 +1,4 @@
+
 module MAR(
 	input [31:0] BusMuxOut,
 	input MARin,
@@ -23,4 +24,4 @@ module MAR(
 	//outputting the lower 9 bits for RAM addressing later on
 	assign address = q[8:0];
 	
-endmodule		
+endmodule
