@@ -1,3 +1,4 @@
+// NOT TESTED
 module DataPath(
     // Control signals to select the bus output
     input PCout, Zhighout, Zlowout, MDRout,
@@ -6,7 +7,7 @@ module DataPath(
     input HIout, LOout, Yout, InPortout, CSignOut,
     // Control signals for selecting/enabling regs
     input MARin, PCin, MDRin, IRin, Yin,
-    input IncPC, Read,
+    input IncPC, Read, Write
     input [4:0] opcode,
     input R0in, R1in, R2in, R3in, 
     input R4in, R5in, R6in, R7in, 
@@ -14,7 +15,7 @@ module DataPath(
     input HIin, LOin, ZHighIn, ZLowIn, Cin,
 
     input clock, clear,
-
+    input [8:0] Address,
     input [31:0] Mdatain
 );
   // All register declarations:
@@ -73,6 +74,14 @@ module DataPath(
 
     BusMuxOut
   );
+  // Memory Subsystem instantiation
+  MemorySubsystem mem_sys (
+    .clear(clear), .clock(clock),
+    .read(Read), .write(Write), 
+    .Mdatain(Mdatain), .address(address),
+    .BusMuxOut(BusMuxOut), .MARin(MARin),
+    .BusMuxInMDR(BusMuxInMDR)
+  )
   // ALU instantiation
   ALU main_alu (
       .clear (clear),

@@ -3,7 +3,7 @@ module mdr(
 	input [31:0] BusMuxOut,
 	input [31:0] Mdatain, 
 	output wire [31:0] BusMuxIn
-); 
+);
 	
 	reg [31:0]q;
 	
