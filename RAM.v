@@ -1,3 +1,4 @@
+//not tested
 module RAM (
 
 	input read, write, clock,
