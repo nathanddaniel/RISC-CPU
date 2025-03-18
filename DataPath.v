@@ -11,7 +11,8 @@ module DataPath(
     input [4:0] opcode,
     input R0in, R1in, R2in, R3in, 
     input R4in, R5in, R6in, R7in, 
-    input R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in,
+    input R8in, R9in, R10in, R11in, 
+    input R12in, R13in, R14in, R15in,
     input HIin, LOin, ZHighIn, ZLowIn, Cin,
 
     input clock, clear,
