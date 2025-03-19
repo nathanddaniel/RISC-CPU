@@ -2,8 +2,8 @@
 module MAR(
 	input [31:0] BusMuxOut,
 	input MARin,
-	input clock,
-	input clear,
+	input Clock,
+	input Clear,
 	output [8:0] Address
 );
 

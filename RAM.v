@@ -19,13 +19,13 @@ module RAM (
 	
 	always @ (posedge Clock) begin
 	
-		if (write) begin
+		if (Write) begin
 		
 			//if write signal is high, we will write data to that address
 			ram[Address] <= Mdatain;
 		end
 		
-		else if (read) begin
+		else if (Read) begin
 			//if read signal is high we will read data from that address
 			data_output <= ram[Address];
 		end
