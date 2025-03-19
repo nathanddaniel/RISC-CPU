@@ -77,7 +77,7 @@ module DataPath(
   // Memory Subsystem instantiation
   MemorySubsystem mem_sys (
     .clear(clear), .clock(clock),
-    .read(Read), .write(Write), 
+    .read(Read), .write(Write), .MDRin(MDRin),
     .Mdatain(Mdatain), .address(address),
     .BusMuxOut(BusMuxOut), .MARin(MARin),
     .BusMuxInMDR(BusMuxInMDR)
