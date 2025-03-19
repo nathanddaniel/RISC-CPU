@@ -1,5 +1,5 @@
 module mdr(
-	input clear, clock, MDRin, read,
+	input Clear, Clock, MDRin, Read,
 	input [31:0] BusMuxOut,
 	input [31:0] Mdatain, 
 	output wire [31:0] BusMuxIn
@@ -7,16 +7,16 @@ module mdr(
 	
 	reg [31:0]q;
 	
-	always @ (posedge clock) begin
+	always @ (posedge Clock) begin
 		
-		if (clear) begin
+		if (Clear) begin
 			//if clear is active, reset MDR
 			q <= 32'b0;
 		end
 		
 		else if (MDRin) begin
 		
-			if (read) begin
+			if (Read) begin
 				//reading from the RAM
 				q <= Mdatain;
 			end

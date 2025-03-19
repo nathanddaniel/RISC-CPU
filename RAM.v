@@ -1,9 +1,9 @@
 //not tested
 module RAM (
 
-	input read, write, clock,
-	input [31:0] data,
-	input [8:0] address,
+	input Read, Write, Clock,
+	input [31:0] Mdatain,
+	input [8:0] Address,
 	output reg [31:0] data_output
 );
 
@@ -17,17 +17,17 @@ module RAM (
             ram[i] = 32'b0;
     end
 	
-	always @ (posedge clock) begin
+	always @ (posedge Clock) begin
 	
 		if (write) begin
 		
 			//if write signal is high, we will write data to that address
-			ram[address] <= data;
+			ram[Address] <= Mdatain;
 		end
 		
 		else if (read) begin
 			//if read signal is high we will read data from that address
-			data_output <= ram[address];
+			data_output <= ram[Address];
 		end
 	end
 	
