@@ -57,7 +57,6 @@ module DataPath(
   register Zlow  (clear, clock, ZLowIn,  BusMuxInZ[31:0],  BusMuxInZlow);
 
   ProgramCounter PC_inst (clock, PCin, IncPC, BusMuxOut, BusMuxInPC);
-  mdr           mdr_i    (clear, clock, MDRin, Read, BusMuxOut, Mdatain, BusMuxInMDR);
   // Bus Mux instantiation
   Bus bus (
 
