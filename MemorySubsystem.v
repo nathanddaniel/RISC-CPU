@@ -5,7 +5,7 @@ module MemorySubsystem(
 	input [31:0] Mdatain,
 	input [8:0] address,
 	input [31:0] BusMuxOut, // For MAR inputs
-	input MARin,
+	input MARin, MDRin,
 	output wire [31:0] BusMuxInMDR // Holds 32 bit output value 
 );
 wire [31:0] data_output = Mdatain[31:0];
