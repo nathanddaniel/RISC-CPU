@@ -1,4 +1,3 @@
-
 module MAR(
 	input [31:0] BusMuxOut,
 	input MARin,
@@ -9,7 +8,7 @@ module MAR(
 
 	reg [8:0] q;
 	
-	always @ (posedge clock) begin
+	always @ (posedge Clock) begin
 	
 		if (Clear)
 			//clearing the MAR to all 0s if clear is active
