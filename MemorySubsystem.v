@@ -8,10 +8,12 @@ module MemorySubsystem(
 	input MARin,
 	output wire [31:0] BusMuxInMDR // Holds 32 bit output value 
 );
-wire [31:0] data_output
+wire [31:0] data_output = Mdatain[31:0];
 
-mdr mdr_i (clear, clock, MDRin, read, BusMuxOut, data_output, BusMuxInMDR);
+mdr mdr_i (clear, clock, MDRin, read, BusMuxOut, data_output, data_output);
 MAR mar (BusMuxOut, MARin, clock, clear, address);
-RAM ram (read, write, clock, Mdatain, address, data_output);
+RAM ram (read, write, clock, data_output, address, data_output);
+
+assign BusMuxInMDR = data_output;
 
 endmodule
