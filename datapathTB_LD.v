@@ -146,28 +146,25 @@ module datapathTB_LD;
         //all control signals that we're going to use is set to 0 to ensure no accidental operations happens
         Clock = 0; Clear = 1; MARin = 0; MDRin = 0; 
         MDRout = 0; Read = 0; Write = 0; R4in = 0;
-        Address = 9'd0;
-        Mdatain = 32'b0;
         
-        // Step 1: Store value into RAM at address 5
-        #10 MARin = 1; Address = 9'd5; // Load Address 5 into MAR
+        Mdatain = 32'b0;
+        BusMuxOut = 32'b0;
+        #10 Clear = 0 //releasing the reset
+        
+        //step 1: loading the address (5) into MAR using BusMuxOut 
+        #10 BusMuxOut = 32'd5; //address value
+        #10 MARin = 1; //load the address into MAR q register
         #10 MARin = 0;
 
-        #10 Mdatain = 32'h12345678; // Set Value to Write
-        #10 MDRin = 1; Write = 1;  // Store data in MDR before writing to RAM
-        #10 MDRin = 0; Write = 0;
+        //step 2: load the data (0x12345678) into MDR using BusMuxOut
+        #10 BusMuxOut = 32'h12345678; //value to put into RAM
+        #10 MDRin = 1  //load the value into MDR, no Mdatain which means loads from BusMuxOut
+        #10 MDRin = 0;
 
-        // Step 2: Read value from RAM into MDR
-        #10 MARin = 1; Address = 9'd5; // Load Address 5 into MAR
-        #10 MARin = 0;
-
-        #10 Read = 1; MDRin = 1;  // Read from RAM into MDR
-        #10 Read = 0; MDRin = 0;
-
-        // Step 3: Transfer value from MDR to Register R4
-        #10 MDRout = 1; R4in = 1; 
-        #10 MDRout = 0; R4in = 0;
-
+        //step 3: write MDR value to RAM
+        #10 Mdatain = BusMuxOut;
+        #10 Write = 1;
+        #10 Write = 0;
     end
      
 endmodule
