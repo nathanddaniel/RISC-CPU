@@ -7,7 +7,7 @@ module DataPath(
     input HIout, LOout, Yout, InPortout, CSignOut,
     // Control signals for selecting/enabling regs
     input MARin, PCin, MDRin, IRin, Yin,
-    input IncPC, Read, Write
+    input IncPC, Read, Write,
     input [4:0] opcode,
     input R0in, R1in, R2in, R3in, 
     input R4in, R5in, R6in, R7in, 
@@ -81,7 +81,7 @@ module DataPath(
     .Mdatain(Mdatain), .address(address),
     .BusMuxOut(BusMuxOut), .MARin(MARin),
     .BusMuxInMDR(BusMuxInMDR)
-  )
+  );
   // ALU instantiation
   ALU main_alu (
       .clear (clear),
