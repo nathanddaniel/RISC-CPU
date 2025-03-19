@@ -47,7 +47,6 @@ module select_and_encode(
 	// For the “in” signals, we just AND each decoded line with Rin.
    assign Rin_decoded = decoder_out & {16{Rin}};
 
-.
    wire [15:0] rout_masked = decoder_out & {16{Rout}};
 	assign Rout_decoded[15:1]  = rout_masked[15:1];  // R1..R15
    assign Rout_decoded[0]     = decoder_out[0] & (Rout | BAout); // Check if this needs to be seperate (May not be needed)
