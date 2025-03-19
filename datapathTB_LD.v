@@ -7,12 +7,29 @@ module datapathTB_LD;
 
     //declaring control signals...each register (reg) holds value for simulation
     reg Clock, Clear; //these control CPU clock and reset signal
-    reg MARin, MDRin, MDRout, Read, Write;
+    reg MARin, MDRin, 
+    reg MDRout;
+    reg Read, Write;
+
+    reg HIin, LOin, ZHighIn, ZLowIn, Cin, Yin;
+    reg HIout, LOut, Yout;
+
+    reg InPortout, CSignOut;
+    reg [4:0] LOAD;
+
+    reg IncPC, PCin, IRin;
     reg PCout, Zhighout, Zlowout;
-    reg R2out, R3
-    reg R4in, R5in;
+
+    reg R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out, R8out;
+    reg R9out, R10out, R11out, R12out, R13out, R14out, R15out;
+
+    reg R0in, R1in, R2in, R3in, R4in, R5in, R6in, R7in,
+    reg R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in;
+
     reg [8:0] Address;
     reg [31:0] Mdatain;
+    reg [31:0] BusMuxOut;
+    reg [31:0] BusMuxInMDR;
 
     /* 
     
@@ -85,7 +102,7 @@ module datapathTB_LD;
         .Read       (Read), 
         .Write      (Write),
 
-        .opcode     (5'b00000),
+        .opcode     (LOAD),
         
         .R0in       (R0in), 
         .R1in       (R1in), 
@@ -94,20 +111,20 @@ module datapathTB_LD;
         .R4in       (R4in),
         .R5in       (R5in), 
         .R6in       (R6in), 
-        .R7in       (0), 
-        .R8in       (0), 
-        .R9in       (0), 
-        .R10in      (0),
-        .R11in      (0), 
-        .R12in      (0), 
-        .R13in      (0), 
-        .R14in      (0), 
-        .R15in      (0),
-        .HIin       (0), 
-        .LOin       (0), 
-        .ZHighIn    (0), 
-        .ZLowIn     (0), 
-        .Cin        (0),
+        .R7in       (R7in), 
+        .R8in       (R8in), 
+        .R9in       (R9in), 
+        .R10in      (R10in),
+        .R11in      (R11in), 
+        .R12in      (R12in), 
+        .R13in      (R13in), 
+        .R14in      (R14in), 
+        .R15in      (R15in),
+        .HIin       (R16in), 
+        .LOin       (R17in), 
+        .ZHighIn    (R18in), 
+        .ZLowIn     (ZLowIn), 
+        .Cin        (Cin),
 
         .clock      (Clock), 
         .clear      (Clear),
@@ -122,85 +139,6 @@ module datapathTB_LD;
             forever #10 Clock = ~ Clock;
     end
 
-    always @(posedge Clock)
-    begin
-        case (Present_state)
-            Default			:	#40 Present_state = Reg_load1a;
-		    Reg_load1a		:	#40 Present_state = Reg_load1b;
-		    Reg_load1b		:	#40 Present_state = Reg_load2a;
-		    Reg_load2a		:	#40 Present_state = Reg_load2b;
-		    Reg_load2b		:	#40 Present_state = Reg_load3a;
-		    Reg_load3a		:	#40 Present_state = Reg_load3b;
-		    Reg_load3b		:	#40 Present_state = T0;
-		    T0				:	#40 Present_state = T1;
-		    T1				:	#40 Present_state = T2;
-		    T2				:	#40 Present_state = T3;
-		    T3				:	#40 Present_state = T4;
-		    T4				:	#40 Present_state = T5;
-		endcase
-    end
-
-    always @(Present_state)
-    begin
-        case (Present_state)
-            Default: begin
-				PCout <= 0;   Zlowout <= 0; ZHighout <= 0;  MDRout<= 0;
-				R2out <= 0;   R3out <= 0;   MARin <= 0;   ZLowIn <= 0;  
-				PCin <=0;   MDRin <= 0;   IRin  <= 0;   Yin <= 0;  
-				IncPC <= 0;   Read <= 0;   LSHIFT <= 0;
-				R1in <= 0; R2in <= 0; R3in <= 0; Mdatain <= 32'h00000000;
-
-                PCout <= 0;     Clock <= 0;     Clear <= 1;
-                MARin <= 0;     MDRin <= 0;     MDRout <= 0;
-                Read <= 0;      Write <= 0;     R4in <= 0;
-                R5in <= 0;      R5out <= 0;     R4out <= 0;
-                PCin <= 0;      
-                Address <= 9'd0;         
-                Mdatain = 32'b0;
-            end
-            Reg_load1a: begin
-                Mdatain<= 32'h00000012;
-				Read = 0; MDRin = 0;	
-				#10 Read <= 1; MDRin <= 1;  
-				#15 Read <= 0; MDRin <= 0;
-            end
-            Reg_load1b: begin
-				#10 MDRout<= 1; R4in <= 1;  
-				#15 MDRout<= 0; R4in <= 0;     // initialize R4 with the value 0x12 (ANS: 1000 0000)
-		    end
-		    T0: begin
-				Mdatain <= 32'h00000007; 
-				PCin <= 1; MDRout <=1;
-				
-				#10 PCout<= 1; MARin <= 1; IncPC <= 1; 
-				#10 PCin <= 0; MDRout <=0; PCout<= 0; MARin <= 0; IncPC <= 0;
-            end
-            T1: begin
-                    Mdatain <= 32'h5A1B8000;   // opcode for "shl R4, R3, R7"
-                    Read <= 1; MDRin <= 1;		// 0101 1010 0001 1011 1000 0000 0000 0000 (5A1B8000)
-                    #10 Read <= 0; MDRin <= 0;
-                    
-            end
-            T2: begin
-                    MDRout<= 1; IRin <= 1; 
-                    #10 MDRout<= 0; IRin <= 0; 
-            end
-            T3: begin
-                    #10 R3out<= 1; Yin <= 1;  
-                    #15 R3out<= 0; Yin <= 0;
-            end
-            T4: begin
-                    R7out<= 1; LSHIFT <= 5'b01011; ZLowIn <= 1; 
-                    #25 R7out<= 0; ZLowIn <= 0; 
-            end
-            T5: begin
-                    Zlowout<= 1; R4in <= 1; 
-                    #25 Zlowout<= 0; R4in <= 0;
-            end
-        endcase
-
-    end
-
     //initial setup and execution
     initial begin
 
@@ -211,25 +149,23 @@ module datapathTB_LD;
         Address = 9'd0;
         Mdatain = 32'b0;
         
-        //after 10ns, Clear is set to 0, letting us carry out normal operation
-        #10 Clear = 0; 
-        
-        // Step 1: Write a value to RAM (Address 5)
-        #10 Mdatain = 32'h12345678;    //setting Mdatain = 0x12345678
-        #10 Address = 9'd5;            //Storing the value at this address
-        #10 Write = 1; #10 Write = 0;  // Store in RAM
-
-        // Step 2: Execute Load (`ld R4, 5`)
-        #10 MARin = 1; Address = 9'd5; // Load address into MAR
+        // Step 1: Store value into RAM at address 5
+        #10 MARin = 1; Address = 9'd5; // Load Address 5 into MAR
         #10 MARin = 0;
 
-        #10 Read = 1;  // Trigger RAM read
-        #10 Read = 0;
+        #10 Mdatain = 32'h12345678; // Set Value to Write
+        #10 MDRin = 1; Write = 1;  // Store data in MDR before writing to RAM
+        #10 MDRin = 0; Write = 0;
 
-        #10 MDRin = 1; // Store RAM output in MDR
-        #10 MDRin = 0;
+        // Step 2: Read value from RAM into MDR
+        #10 MARin = 1; Address = 9'd5; // Load Address 5 into MAR
+        #10 MARin = 0;
 
-        #10 MDRout = 1; R4in = 1; // Load MDR data into R4
+        #10 Read = 1; MDRin = 1;  // Read from RAM into MDR
+        #10 Read = 0; MDRin = 0;
+
+        // Step 3: Transfer value from MDR to Register R4
+        #10 MDRout = 1; R4in = 1; 
         #10 MDRout = 0; R4in = 0;
 
     end
