@@ -9,6 +9,8 @@ module RAM (
 
 	//creating the 512 x 32-bit array in memory
 	reg [31:0] ram [0:511];
+
+	integer i;
 	
 	//Initialize RAM contents to zero
 	integer i;
