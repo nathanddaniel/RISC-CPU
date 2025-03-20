@@ -11,8 +11,8 @@ module RAM (
 	reg [31:0] ram [0:511];
 	
 	//Initialize RAM contents to zero
+	integer i;
 	initial begin
-        integer i;
         for (i = 0; i < 512; i = i + 1) 
             ram[i] = 32'b0;
     end
