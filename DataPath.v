@@ -79,7 +79,7 @@ module DataPath(
     .clear(clear), .clock(clock),
     .read(Read), .write(Write), 
     .Mdatain(Mdatain), .address(address),
-    .BusMuxOut(BusMuxOut), .MARin(MARin), .MDRin(MDRin)
+    .BusMuxOut(BusMuxOut), .MARin(MARin), .MDRin(MDRin),
     .BusMuxInMDR(BusMuxInMDR)
   );
   // ALU instantiation
