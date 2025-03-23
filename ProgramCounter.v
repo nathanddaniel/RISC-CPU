@@ -1,5 +1,8 @@
 module ProgramCounter (
-    input enable, clock, clear, IncPC,
+    input clock, 
+	 input clear, 
+	 input enable,
+	 input IncPC,
     input [31:0] inputPC,
     output reg[31:0] newPC
 );

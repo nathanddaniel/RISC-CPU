@@ -1,25 +1,21 @@
 // NOT TESTED
 module DataPath(
-    // Control signals to select the bus output
-    input PCout, Zhighout, Zlowout, MDRout,
-    input R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
-    input R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
-    input HIout, LOout, Yout, InPortout, CSignOut,
-    // Control signals for selecting/enabling regs
+
+    input PCout, Zhighout, Zlowout, MDRout, BAout, Rin, Rout,
+    input HIout, LOout, Yout, InPortout, Cout,
     input MARin, PCin, MDRin, IRin, Yin,
     input IncPC, Read, Write,
+	 input Gra, Grb, Grc, 				 
     input [4:0] opcode,
-    input R0in, R1in, R2in, R3in, 
-    input R4in, R5in, R6in, R7in, 
-    input R8in, R9in, R10in, R11in, 
-    input R12in, R13in, R14in, R15in,
-    input HIin, LOin, ZHighIn, ZLowIn, Cin,
-
+    input HIin, LOin, ZHighIn, ZLowIn,
     input clock, clear,
     input [8:0] Address,
-    input [31:0] Mdatain
+    input [31:0] Mdatain,
+	 
+	 output R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
+    output R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out
 );
-  // All register declarations:
+
   wire [63:0] BusMuxInZ;
 
   wire [31:0] BusMuxInR0, BusMuxInR1, BusMuxInR2, BusMuxInR3;
@@ -30,7 +26,17 @@ module DataPath(
   wire [31:0] BusMuxInZhigh, BusMuxInZlow;
   wire [31:0] BusMuxInPC, BusMuxInMDR, BusMuxIn_InPort, BusMuxInCsignextended;
   wire [31:0] BusMuxOut;
-
+  
+  wire [8:0]  mem_address;
+  wire [31:0] mem_data_out;
+  wire [31:0] mem_data_in;
+  wire [15:0] RinSignals, RoutSignals;
+  
+  wire [31:0] IR_out;
+  wire [4:0] Opcode;
+  wire [3:0] Ra, Rb, Rc;
+  wire [14:0] C;
+  
   register r0  (clear, clock, R0in,  BusMuxOut, BusMuxInR0);
   register r1  (clear, clock, R1in,  BusMuxOut, BusMuxInR1);
   register r2  (clear, clock, R2in,  BusMuxOut, BusMuxInR2);
@@ -50,46 +56,114 @@ module DataPath(
 
   register HI  (clear, clock, HIin,  BusMuxOut, BusMuxInHI);
   register LO  (clear, clock, LOin,  BusMuxOut, BusMuxInLO);
-
   register Y   (clear, clock, Yin,   BusMuxOut, BusMuxInY);
-
   register Zhigh (clear, clock, ZHighIn, BusMuxInZ[63:32], BusMuxInZhigh);
   register Zlow  (clear, clock, ZLowIn,  BusMuxInZ[31:0],  BusMuxInZlow);
+  
+  ProgramCounter PC_inst (
+		 .clock(clock),        // Correct mapping
+		 .clear(clear),        // Correct mapping
+		 .enable(PCin),        // Use PCin instead of "enable"
+		 .IncPC(IncPC),        // Correct mapping
+		 .inputPC(BusMuxOut),  // PC takes its input from the bus
+		 .newPC(BusMuxInPC)    // The new PC value is stored in BusMuxInPC
+	);
+  
+  // Assign register enable signals
+  assign {R15in, R14in, R13in, R12in, R11in, R10in, R9in, R8in,
+          R7in, R6in, R5in, R4in, R3in, R2in, R1in, R0in} = RinSignals;
 
-  ProgramCounter PC_inst (clock, PCin, IncPC, BusMuxOut, BusMuxInPC);
+  assign {R15out, R14out, R13out, R12out, R11out, R10out, R9out, R8out,
+          R7out, R6out, R5out, R4out, R3out, R2out, R1out, R0out} = RoutSignals;  
+  
+  // Instantiate MAR (Memory Address Register)
+  MAR mar_inst (
+      .BusMuxOut(BusMuxOut), 
+      .MARin(MARin), 
+      .Clock(clock), 
+      .Clear(clear), 
+      .Address(mem_address) // Connects to RAM
+  );
+  
+  // Instantiate RAM (Memory)
+  RAM ram_inst (
+      .Read(Read), 
+      .Write(Write), 
+      .Clock(clock), 
+      .Mdatain(MDRout), 
+      .Address(mem_address), 
+      .data_output(mem_data_out) // Output to MDR
+  );
+  
+  // Instantiate MDR (Memory Data Register)
+  mdr mdr_inst (
+      .Clear(clear), 
+      .Clock(clock), 
+      .MDRin(MDRin), 
+      .Read(Read), 
+      .BusMuxOut(BusMuxOut), 
+      .Mdatain(mem_data_out), // Data from RAM
+      .BusMuxIn(BusMuxInMDR), // Output to CPU Bus
+		.MDRout(MDRout)
+  );
+  
+  
   // Bus Mux instantiation
   Bus bus (
+    .BusMuxInR0(BusMuxInR0), .BusMuxInR1(BusMuxInR1), .BusMuxInR2(BusMuxInR2), .BusMuxInR3(BusMuxInR3),
+    .BusMuxInR4(BusMuxInR4), .BusMuxInR5(BusMuxInR5), .BusMuxInR6(BusMuxInR6), .BusMuxInR7(BusMuxInR7),
+    .BusMuxInR8(BusMuxInR8), .BusMuxInR9(BusMuxInR9), .BusMuxInR10(BusMuxInR10), .BusMuxInR11(BusMuxInR11),
+    .BusMuxInR12(BusMuxInR12), .BusMuxInR13(BusMuxInR13), .BusMuxInR14(BusMuxInR14), .BusMuxInR15(BusMuxInR15),
+    .BusMuxInHI(BusMuxInHI), .BusMuxInLO(BusMuxInLO), .BusMuxInY(BusMuxInY), .BusMuxInZhigh(BusMuxInZhigh),
+    .BusMuxInZlow(BusMuxInZlow), .BusMuxInPC(BusMuxInPC), .BusMuxInMDR(BusMuxInMDR),
+    .BusMuxIn_InPort(BusMuxIn_InPort), .BusMuxInCsignextended(BusMuxInCsignextended),
 
-    BusMuxInR0, BusMuxInR1, BusMuxInR2, BusMuxInR3, 
-    BusMuxInR4, BusMuxInR5, BusMuxInR6, BusMuxInR7,
-    BusMuxInR8, BusMuxInR9, BusMuxInR10, BusMuxInR11,
-    BusMuxInR12, BusMuxInR13, BusMuxInR14, BusMuxInR15,
-    BusMuxInHI, BusMuxInLO, BusMuxInY, BusMuxInZhigh, BusMuxInZlow,
-    BusMuxInPC, BusMuxInMDR, BusMuxIn_InPort, BusMuxInCsignextended,
+    .PCout(PCout), .Zhighout(Zhighout), .Zlowout(Zlowout), .MDRout(MDRout),
+    .R0out(R0out), .R1out(R1out), .R2out(R2out), .R3out(R3out), .R4out(R4out), .R5out(R5out), 
+    .R6out(R6out), .R7out(R7out), .R8out(R8out), .R9out(R9out), .R10out(R10out), .R11out(R11out), 
+    .R12out(R12out), .R13out(R13out), .R14out(R14out), .R15out(R15out), 
+    .HIout(HIout), .LOout(LOout), .Yout(Yout), .InPortout(InPortout), .Cout(Cout),
 
-    PCout, Zhighout, Zlowout, MDRout,
-    R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
-    R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
-    HIout, LOout, Yout, InPortout, CSignOut,
-
-    BusMuxOut
+    .BusMuxOut(BusMuxOut)
   );
-  // Memory Subsystem instantiation
-  MemorySubsystem mem_sys (
-    .clear(clear), .clock(clock),
-    .read(Read), .write(Write), 
-    .Mdatain(Mdatain), .address(address),
-    .BusMuxOut(BusMuxOut), .MARin(MARin), .MDRin(MDRin),
-    .BusMuxInMDR(BusMuxInMDR)
+  
+  select_and_encode selectLogic (
+    .Gra(Gra),		// Inputs from Control Unit
+    .Grb(Grb),		
+    .Grc(Grc),
+    .Rin(Rin),
+    .Rout(Rout),
+    .BAout(BAout),
+    .Ra(Ra),     						 // From IR_out[Ra_field]
+    .Rb(Rb),     						 // From IR_out[Rb_field]
+    .Rc(Rc),     						 // From IR_out[Rc_field]
+    .C(C),       						 // From IR_out[C_field]
+    .RinSignals(RinSignals),      // To register enables (R0in, R1in, etc.)
+    .RoutSignals(RoutSignals),    // To bus control (R0out, R1out, etc.)
+    .C_sign_extended(BusMuxInCsignextended) 
   );
+  
   // ALU instantiation
   ALU main_alu (
-      .clear (clear),
-      .clock (clock),
-      .opcode(opcode),
-      .A     (BusMuxInY),  // Operand A recieves value from reg Y   
-      .B     (BusMuxOut),  // Operand B recieves value from bus  
-      .Z     (BusMuxInZ)   // Result is stored in reg Z
+			.clear (clear),
+			.clock (clock),
+			.opcode(opcode),
+			.A     (BusMuxInY),  // Operand A recieves value from reg Y   
+			.B     (BusMuxOut),  // Operand B recieves value from bus  
+			.Z     (BusMuxInZ)   // Result is stored in reg Z
   );
+  
+  IR ir_inst (
+		 .Clock(clock),
+		 .Clear(clear),
+		 .IRin(IRin),
+		 .BusMuxOut(BusMuxOut), // Gets instruction from the CPU bus
+		 .IR(IR_out), 				// Stores the instruction
+		 .Opcode(IR_out[31:27]), 		// Extracts the opcode field
+		 .Ra(IR_out[26:23]), 
+		 .Rb(IR_out[22:19]), 
+		 .Rc(IR_out[18:15]), 					// Extracts the register fields
+		 .C(IR_out[14:0]) 						// Extracts the constant field
+	);
 
 endmodule
