@@ -7,15 +7,18 @@ module ProgramCounter (
     output reg[31:0] newPC
 );
 
-always @ (posedge clock) begin
-    if (clear) 
-        newPC <= 32'b0;
-    else if (enable) begin
-        if (IncPC)
-            newPC <= newPC + 1;
-        else
-            newPC <= inputPC;
-    end
-end
+	// Set PC to zero on power-up
+   initial newPC = 32'b0;
+
+	always @ (posedge clock) begin
+		 if (clear) 
+			  newPC <= 32'b0;
+		 else if (enable) begin
+			  if (IncPC)
+					newPC <= newPC + 1;
+			  else
+					newPC <= inputPC;
+		 end
+	end
 
 endmodule

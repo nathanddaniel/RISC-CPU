@@ -13,8 +13,8 @@ module datapathTB_LD;
     reg Gra, Grb, Grc, BAout;
     reg [4:0] ADD;
     reg HIin, LOin, ZHighIn, ZLowIn;
-    reg [8:0] Address;    // For RAM address
-    reg [31:0] Mdatain;   // For RAM data input  
+    reg [8:0] Address;    
+    reg [31:0] Mdatain;     
 	 reg Rout, Rin;
 	 reg Cout, HIout, LOout, Yout, InPortout;
 
@@ -113,23 +113,23 @@ module datapathTB_LD;
             end
 				
 				T0: begin 
-                PCout <= 1;        MARin <= 1;      IncPC <= 1;   ZLowIn <= 1;
-                #10 PCout <= 0;    MARin <= 0;      IncPC <= 0;   ZLowIn <= 0;
+                MARin <= 1;         PCin <= 1;		  IncPC <= 1;  PCout <= 1;   	ZLowIn <= 1;
+                #25 PCout <= 0;     MARin <= 0;      IncPC <= 0;  PCin <= 0; 		ZLowIn <= 0;
             end
 
 			  T1: begin 
-                Zlowout <= 1;         PCin <= 1;        Read <= 1;      MDRin <= 1;
-                #10 Zlowout <= 0;     PCin <= 0;        Read <= 0;      MDRin <= 0; // Fixed reset
+                Zlowout <= 1;       PCin <= 1;       Read <= 1;    MDRin <= 1;
+                #25 Zlowout <= 0;   PCin <= 0;       Read <= 0;    MDRin <= 0; 
             end
 
 			  T2: begin 
                 MDRout <= 1;         IRin <= 1; 
-                #10 MDRout <= 0;     IRin <= 0;
+                #25 MDRout <= 0;     IRin <= 0;
             end
 
 			  T3: begin 
                 Grb <= 1;             BAout <= 1;       Yin <= 1; 
-                #10 Grb <= 0;         BAout <= 0;       Yin <= 0;
+                #25 Grb <= 0;         BAout <= 0;       Yin <= 0;
             end
 
 			  T4: begin 

@@ -3,8 +3,8 @@ module IR (
     input Clock,
     input Clear,
     input IRin,
-    input [31:0] BusMuxOut,  //instruction from the bus
-    output reg [31:0] IR, //full instruction storage
+    input [31:0] BusMuxOut,  		//instruction from the bus
+    output reg [31:0] IR, 			//full instruction storage
     output wire [4:0] Opcode,
     output wire [3:0] Ra, Rb, Rc,
     output wire [14:0] C

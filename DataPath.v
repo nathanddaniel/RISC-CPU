@@ -5,7 +5,7 @@ module DataPath(
     input HIout, LOout, Yout, InPortout, Cout,
     input MARin, PCin, MDRin, IRin, Yin,
     input IncPC, Read, Write,
-	 input Gra, Grb, Grc, 				 
+	  input Gra, Grb, Grc, 				 
     input [4:0] opcode,
     input HIin, LOin, ZHighIn, ZLowIn,
     input clock, clear,
@@ -31,6 +31,7 @@ module DataPath(
   wire [31:0] mem_data_out;
   wire [31:0] mem_data_in;
   wire [15:0] RinSignals, RoutSignals;
+  wire [31:0] MDR_data_out;
   
   wire [31:0] IR_out;
   wire [4:0] Opcode;
@@ -90,7 +91,7 @@ module DataPath(
       .Read(Read), 
       .Write(Write), 
       .Clock(clock), 
-      .Mdatain(MDRout), 
+      .Mdatain(MDR_data_out), 
       .Address(mem_address), 
       .data_output(mem_data_out) // Output to MDR
   );
@@ -104,7 +105,7 @@ module DataPath(
       .BusMuxOut(BusMuxOut), 
       .Mdatain(mem_data_out), // Data from RAM
       .BusMuxIn(BusMuxInMDR), // Output to CPU Bus
-		.MDRout(MDRout)
+		.MDR_data_out(MDR_data_out)
   );
   
   
