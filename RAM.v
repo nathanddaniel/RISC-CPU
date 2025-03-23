@@ -1,7 +1,9 @@
 //not tested
 module RAM (
 
-	input Read, Write, Clock,
+	input Read, 
+	input Write, 
+	input Clock,
 	input [31:0] Mdatain,
 	input [8:0] Address,
 	output reg [31:0] data_output
@@ -16,6 +18,10 @@ module RAM (
 	initial begin
         for (i = 0; i < 512; i = i + 1) 
             ram[i] = 32'b0;
+			
+			//hard coding in values for the ld instruction
+		  ram[9'h054] = 32'h00000097;  // Case 1: (0x54) = 0x97
+		  ram[9'h0DB] = 32'h00000046;  // Case 2: (0xDB) = 0x46 
     end
 	
 	always @ (posedge Clock) begin
@@ -26,7 +32,7 @@ module RAM (
 			ram[Address] <= Mdatain;
 		end
 		
-		else if (Read) begin
+		if (Read) begin
 			//if read signal is high we will read data from that address
 			data_output <= ram[Address];
 		end
