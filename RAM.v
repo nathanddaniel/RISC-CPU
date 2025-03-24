@@ -20,7 +20,7 @@ module RAM (
             ram[i] = 32'b0;
 			
 		  // Hardcoded instructions
-		  ram[9'h00] = 32'h08005400;  // ld R4, 0x54
+		  ram[9'h00] = 32'h02000054;  // ld R4, 0x54
 		  ram[9'h01] = 32'h0C863000;  // ld R6, 0x63(R2)
         ram[9'h02] = 32'h14054000;  // ldi R4, 0x54
         ram[9'h03] = 32'h16263000;  // ldi R6, 0x63(R2)
@@ -48,7 +48,7 @@ module RAM (
 		
 		if (Read) begin
 			//if read signal is high we will read data from that address
-			data_output <= ram[Address];
+			data_output <= ram[Address]; //ram[Address];
 		end
 	end
 	

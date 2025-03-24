@@ -5,8 +5,8 @@ module mdr(
 	input Read,
 	input [31:0] BusMuxOut,
 	input [31:0] Mdatain, 
-	output wire [31:0] BusMuxIn,		//tri-state logic controlled by MDRout
-	output wire [31:0] MDRout			//drives data to RAM
+	output wire [31:0] BusMuxIn,					//tri-state logic controlled by MDRout
+	output wire [31:0] MDR_data_out			//drives data to RAM
 );
 	
 	reg [31:0] q;							//mdr register
@@ -24,10 +24,7 @@ module mdr(
 		end
 	end
 				
-	// Tri-state buffer for BusMuxIn (only drive bus when MDRout=1)
-   assign BusMuxIn = (MDRout) ? q : 32'bz;
-
-   // Directly connect MDRout to RAM (no tri-state needed here)
-   assign MDRout = q;
+   assign BusMuxIn = q;
+   assign MDR_data_out = q;
 	
 endmodule

@@ -21,7 +21,7 @@ module select_and_encode (
 		else if (Grc)
 			select_reg = Rc;
 		else
-			select_reg = 4'b0000;					//defaulting to R0 if theres no selection
+			select_reg = 4'b0000;							//defaulting to R0 if theres no selection
 	end
 	
 	//decode the selected 4-bit register address into a one-hot 16-bit input
@@ -29,19 +29,19 @@ module select_and_encode (
 		RinSignals = 16'b0;
 		RoutSignals = 16'b0;
 		
-		if (BAout && (select_reg == 4'b0000)) begin
-			RoutSignals = 16'b0;
-		end
-		else begin
-			if (Rin)
-				RinSignals = (1 << select_reg);
-			if (Rout)
-				RoutSignals = (1 << select_reg);
-		end
+		if (Rin)
+			RinSignals = (1 << select_reg);
+		if (Rout) begin
+		
+         if (BAout && (select_reg == 4'b0000)) 
+             RoutSignals = 16'b0;  						// If BAout is asserted & Rb = R0, force Rout to zero
+         else
+             RoutSignals = (1 << select_reg);
+      end
 	end
 	
 	always @(*) begin
-		C_sign_extended = {{17{C[14]}}, C}; // Correctly extends the MSB (C[14]) to higher bits 
+		C_sign_extended = {{17{C[14]}}, C}; 			// Correctly extends the MSB (C[14]) to higher bits 
 		
 	end
 	

@@ -112,44 +112,47 @@ module datapathTB_LD;
                 Cout <= 0;  
             end
 				
-				T0: begin 
-                MARin <= 1;         PCin <= 1;		  IncPC <= 1;  PCout <= 1;   	ZLowIn <= 1;
-                #25 PCout <= 0;     MARin <= 0;      IncPC <= 0;  PCin <= 0; 		ZLowIn <= 0;
+			T0: begin 
+                #10 MARin <= 1;         IncPC <= 1;  	  PCout <= 1;   ZLowIn <= 1;
+                
             end
 
 			  T1: begin 
-                Zlowout <= 1;       PCin <= 1;       Read <= 1;    MDRin <= 1;
-                #25 Zlowout <= 0;   PCin <= 0;       Read <= 0;    MDRin <= 0; 
+				PCout <= 0;     			 MARin <= 0;      	ZLowIn <= 0;
+                #10 Zlowout <= 1;       PCin <= 1;       	Read <= 1;    	MDRin <= 1;  
+                
             end
 
 			  T2: begin 
-                MDRout <= 1;         IRin <= 1; 
-                #25 MDRout <= 0;     IRin <= 0;
+				Zlowout <= 0;   			 PCin <= 0;       	MDRin <= 0;    IncPC <= 0;
+                #10 MDRout <= 1;        IRin <= 1; 
             end
 
 			  T3: begin 
-                Grb <= 1;             BAout <= 1;       Yin <= 1; 
-                #25 Grb <= 0;         BAout <= 0;       Yin <= 0;
+				MDRout <= 0;     		 IRin <= 0;
+                #10 Grb <= 1;           BAout <= 1;      	Yin <= 1; 
             end
 
 			  T4: begin 
-                Cout <= 1;           ADD <= 5'b00011;   ZLowIn <= 1;  // Fixed naming and register assignment
-                #10 Cout <= 0;       ZLowIn <= 0;  // Fixed incorrect Zin assignment
+				Grb <= 0;         		 BAout <= 0;       	Yin <= 0;
+                #10 Cout <= 1;          ADD <= 5'b00011;   	ZLowIn <= 1;  // Fixed naming and register assignment
             end
 
 			  T5: begin 
-                Zlowout <= 1;         MARin <= 1; 
-                #10 Zlowout <= 0;     MARin <= 0;
+				Cout <= 0;       		 ZLowIn <= 0;  		// Fixed incorrect Zin assignment
+                #10 Zlowout <= 1;       MARin <= 1; 
+                Zlowout <= 0;     		 MARin <= 0;
             end
 
-			  T6: begin 
-                Read <= 1;            MDRin <= 1;		 
-                #10 Read <= 0;        MDRin <= 0;  // Fixed missing reset
+			  T6: begin
+				#10 Zlowout <= 0;     	 MARin <= 0;
+                Read <= 1;              MDRin <= 1;		 
             end
 
 			  T7: begin 
-                Gra <= 1;             MDRout <= 1;     Rin <= 1;
-                #10 Gra <= 0;         MDRout <= 0;     Rin <= 0;
+				#10 Read <= 0;        	 MDRin <= 0;  			// Fixed missing reset
+                Gra <= 1;               MDRout <= 1;     	Rin <= 1;
+                #10 Gra <= 0;           MDRout <= 0;     	Rin <= 0;
             end
 		endcase
 	end

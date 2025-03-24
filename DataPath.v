@@ -5,7 +5,7 @@ module DataPath(
     input HIout, LOout, Yout, InPortout, Cout,
     input MARin, PCin, MDRin, IRin, Yin,
     input IncPC, Read, Write,
-	  input Gra, Grb, Grc, 				 
+	 input Gra, Grb, Grc, 				 
     input [4:0] opcode,
     input HIin, LOin, ZHighIn, ZLowIn,
     input clock, clear,
@@ -38,7 +38,15 @@ module DataPath(
   wire [3:0] Ra, Rb, Rc;
   wire [14:0] C;
   
-  register r0  (clear, clock, R0in,  BusMuxOut, BusMuxInR0);
+   r0 r0_inst (
+		 .clear(clear),
+		 .clock(clock),
+		 .enable(R0in),
+		 .BAout(BAout), // New BAout signal connected
+		 .BusMuxOut(BusMuxOut),
+		 .BusMuxIn(BusMuxInR0)
+  );
+	
   register r1  (clear, clock, R1in,  BusMuxOut, BusMuxInR1);
   register r2  (clear, clock, R2in,  BusMuxOut, BusMuxInR2);
   register r3  (clear, clock, R3in,  BusMuxOut, BusMuxInR3);
@@ -123,13 +131,13 @@ module DataPath(
     .R0out(R0out), .R1out(R1out), .R2out(R2out), .R3out(R3out), .R4out(R4out), .R5out(R5out), 
     .R6out(R6out), .R7out(R7out), .R8out(R8out), .R9out(R9out), .R10out(R10out), .R11out(R11out), 
     .R12out(R12out), .R13out(R13out), .R14out(R14out), .R15out(R15out), 
-    .HIout(HIout), .LOout(LOout), .Yout(Yout), .InPortout(InPortout), .Cout(Cout),
+    .HIout(HIout), .LOout(LOout), .Yout(Yout), .InPortout(InPortout), .Cout(Cout), .BAout(BAout),
 
     .BusMuxOut(BusMuxOut)
   );
   
   select_and_encode selectLogic (
-    .Gra(Gra),		// Inputs from Control Unit
+    .Gra(Gra),		
     .Grb(Grb),		
     .Grc(Grc),
     .Rin(Rin),
