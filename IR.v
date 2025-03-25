@@ -34,6 +34,13 @@ module IR (
       Jaddr = 23'b00000000000000000000000;
 		
 		case (Opcode)
+				// I-Format Instructions: ld, ldi, st
+				5'b00000, 5'b00001, 5'b00010: begin
+					Ra = IR[26:23];
+					Rb = IR[22:19];
+					C = IR[18:0];
+				end
+		
             // **R-Format Instructions**: add, sub, and, or, shr, shra, shl, ror, rol
             5'b00011, 5'b00100, 5'b00101, 5'b00110, 5'b00111, 
             5'b01000, 5'b01001, 5'b01010, 5'b01011: begin
