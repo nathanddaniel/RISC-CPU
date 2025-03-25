@@ -20,15 +20,15 @@ module RAM (
             ram[i] = 32'b0;
 			
 		  // Hardcoded instructions
-		  ram[9'h00] = 32'h02000054;  // ld R4, 0x54
-		  ram[9'h01] = 32'h0C863000;  // ld R6, 0x63(R2)
+		ram[9'h00] = 32'h02000054;  // ld R4, 0x54
+		ram[9'h01] = 32'h0C863000;  // ld R6, 0x63(R2)
         ram[9'h02] = 32'h14054000;  // ldi R4, 0x54
         ram[9'h03] = 32'h16263000;  // ldi R6, 0x63(R2)
         ram[9'h04] = 32'h23034000;  // st 0x34, R3
         ram[9'h05] = 32'h23334000;  // st 0x34(R3), R3
 		  
 		  // Hardcoded memory values
-		  ram[9'h054] = 32'h00000097;  // Data at RAM[0x54] = 0x97
+		ram[9'h054] = 32'h00000097;  // Data at RAM[0x54] = 0x97
         ram[9'h078] = 32'h00000078;  // R2 contains 0x78
         ram[9'h0DB] = 32'h00000046;  // Data at RAM[0xDB] = 0x46
         ram[9'h034] = 32'h00000025;  // Data at RAM[0x34] = 0x25 (before store)

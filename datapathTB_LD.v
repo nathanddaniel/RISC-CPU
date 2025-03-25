@@ -1,5 +1,8 @@
 //NOT TESTED
-
+/* TO DO:
+    Currently the Zlowout and MARin values in T5 are being over-ridden to be redundant and not used
+    This likely leads to the issue seen in the Wave Diagram with the incorrect value in the Address register 
+*/
 `timescale 1ns/1ps
 
 module datapathTB_LD;
@@ -135,7 +138,7 @@ module datapathTB_LD;
             end
 
 			  T2: begin 
-					 Zlowout <= 0;   			 PCin <= 0;       	MDRin <= 0;    IncPC <= 0;
+					 Zlowout <= 0;   			 PCin <= 0;      Read <= 0; MDRin <= 0;    IncPC <= 0;
                 #10 MDRout <= 1;        IRin <= 1; 
             end
 
