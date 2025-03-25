@@ -1,9 +1,9 @@
 
 module select_and_encode (
 
-	input Gra, Grb, Grc, Rin, Rout, BAout,		//control signals
+	input Gra, Grb, Grc, Rin, Rout, BAout,		    //control signals
 	input [3:0] Ra, Rb, Rc,							//register fields from IR
-	input [14:0] C,									//immediate constant from IR
+	input [18:0] C,									//immediate constant from IR
 	output reg [15:0] RinSignals,					//one-hot encoded register write enable
 	output reg [15:0] RoutSignals,				//one-hot encoded register read enable
 	output reg [31:0] C_sign_extended			//sign extended constant
@@ -41,8 +41,7 @@ module select_and_encode (
 	end
 	
 	always @(*) begin
-		C_sign_extended = {{17{C[14]}}, C}; 			// Correctly extends the MSB (C[14]) to higher bits 
-		
+		C_sign_extended = {{13{C[18]}}, C};  // Correctly extends the MSB (C[18]) to all higher-order bits		
 	end
 	
 endmodule

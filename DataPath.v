@@ -2,8 +2,8 @@
 module DataPath(
 
     input PCout, Zhighout, Zlowout, MDRout, BAout, Rin, Rout,
-    input HIout, LOout, Yout, InPortout, Cout,
-    input MARin, PCin, MDRin, IRin, Yin,
+    input HIout, LOout, Yout, InPortout, Cout, OutPortin,
+    input MARin, PCin, MDRin, IRin, Yin, CONin,
     input IncPC, Read, Write,
 	 input Gra, Grb, Grc, 				 
     input [4:0] opcode,
@@ -11,9 +11,12 @@ module DataPath(
     input clock, clear,
     input [8:0] Address,
     input [31:0] Mdatain,
+	 input wire [31:0] InPortData,
 	 
 	 output R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out,
-    output R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out
+    output R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out,
+	 output wire [31:0] OutPortData
+
 );
 
   wire [63:0] BusMuxInZ;
@@ -36,7 +39,9 @@ module DataPath(
   wire [31:0] IR_out;
   wire [4:0] Opcode;
   wire [3:0] Ra, Rb, Rc;
-  wire [14:0] C;
+  wire [18:0] C;
+  wire [3:0] C2;
+  wire CON_out;
   
    r0 r0_inst (
 		 .clear(clear),
@@ -69,13 +74,26 @@ module DataPath(
   register Zhigh (clear, clock, ZHighIn, BusMuxInZ[63:32], BusMuxInZhigh);
   register Zlow  (clear, clock, ZLowIn,  BusMuxInZ[31:0],  BusMuxInZlow);
   
-  ProgramCounter PC_inst (
-		 .clock(clock),        // Correct mapping
-		 .clear(clear),        // Correct mapping
-		 .enable(PCin),        // Use PCin instead of "enable"
-		 .IncPC(IncPC),        // Correct mapping
-		 .inputPC(BusMuxOut),  // PC takes its input from the bus
-		 .newPC(BusMuxInPC)    // The new PC value is stored in BusMuxInPC
+	
+	// Instantiate CON FF
+	CON_FF con_ff (
+     .Clock(clock),
+     .Clear(clear),
+     .CONin(CONin),      // Control signal from Control Unit
+     .BusMuxOut(BusMuxOut), // Value from the Bus
+     .C2(C2),       // Extracts IR[20:19] for condition checking
+     .CON(CON_out)           // Output flag to indicate if the branch is taken
+	);
+
+	ProgramCounter PC_inst (
+		  .clock(clock),        
+		  .clear(clear),        
+		  .enable(PCin),        
+		  .IncPC(IncPC),        
+		  .CON(CON_out),                              // NEW: Uses branch condition signal
+		  .inputPC(BusMuxOut),                    
+		  .C_sign_extended(BusMuxInCsignextended), // NEW: Uses the sign-extended branch offset
+		  .newPC(BusMuxInPC)                      
 	);
   
   // Assign register enable signals
@@ -143,12 +161,12 @@ module DataPath(
     .Rin(Rin),
     .Rout(Rout),
     .BAout(BAout),
-    .Ra(Ra),     						 // From IR_out[Ra_field]
-    .Rb(Rb),     						 // From IR_out[Rb_field]
-    .Rc(Rc),     						 // From IR_out[Rc_field]
-    .C(C),       						 // From IR_out[C_field]
-    .RinSignals(RinSignals),      // To register enables (R0in, R1in, etc.)
-    .RoutSignals(RoutSignals),    // To bus control (R0out, R1out, etc.)
+    .Ra(Ra),     						 
+    .Rb(Rb),     						 
+    .Rc(Rc),     						 
+    .C(C),       						 
+    .RinSignals(RinSignals),      
+    .RoutSignals(RoutSignals),    
     .C_sign_extended(BusMuxInCsignextended) 
   );
   
@@ -157,22 +175,40 @@ module DataPath(
 			.clear (clear),
 			.clock (clock),
 			.opcode(opcode),
-			.A     (BusMuxInY),  // Operand A recieves value from reg Y   
-			.B     (BusMuxOut),  // Operand B recieves value from bus  
-			.Z     (BusMuxInZ)   // Result is stored in reg Z
+			.A     (BusMuxInY),  //Operand A recieves value from reg Y   
+			.B     (BusMuxOut),  //Operand B recieves value from bus  
+			.Z     (BusMuxInZ)   //Result is stored in reg Z
   );
   
-  IR ir_inst (
-		 .Clock(clock),
-		 .Clear(clear),
-		 .IRin(IRin),
-		 .BusMuxOut(BusMuxOut), // Gets instruction from the CPU bus
-		 .IR(IR_out), 				// Stores the instruction
-		 .Opcode(IR_out[31:27]), 		// Extracts the opcode field
-		 .Ra(IR_out[26:23]), 
-		 .Rb(IR_out[22:19]), 
-		 .Rc(IR_out[18:15]), 					// Extracts the register fields
-		 .C(IR_out[14:0]) 						// Extracts the constant field
+	IR ir_inst (
+		  .Clock(clock),
+		  .Clear(clear),
+		  .IRin(IRin),
+		  .BusMuxOut(BusMuxOut), //Gets instruction from the CPU bus
+		  .IR(IR_out),           //Stores the instruction
+		  .Opcode(Opcode),       //Extracts the opcode field
+		  .Ra(Ra), 
+		  .Rb(Rb), 
+		  .Rc(Rc),               //Extracts the register fields
+		  .C(C),                 //Extracts the constant field
+		  .C2(C2),               //Extracts the branch condition field (NEW)
+		  .Jaddr(Jaddr)          //Extracts the jump address (NEW)
 	);
+	
+	InPort inport_inst (
+		 .clock(clock),
+		 .clear(clear),
+		 .InPortData(InPortData),        // External input signal
+		 .BusMuxIn_InPort(BusMuxIn_InPort) // Connects to the CPU bus
+	);
+	
+	OutPort outport_inst (
+		 .clock(clock),
+		 .clear(clear),
+		 .OutPortin(OutPortin),   // Write enable for OutPort
+		 .BusMuxOut(BusMuxOut),   // Data from the Bus
+		 .OutPortData(OutPortData) // Connects to the external output
+	);
+
 
 endmodule

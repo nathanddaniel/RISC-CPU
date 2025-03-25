@@ -1,24 +1,28 @@
+
 module ProgramCounter (
     input clock, 
-	 input clear, 
-	 input enable,
-	 input IncPC,
-    input [31:0] inputPC,
-    output reg[31:0] newPC
+    input clear, 
+    input enable,
+    input IncPC,
+    input CON,               // NEW: Branch condition input
+    input [31:0] inputPC, 
+    input [31:0] C_sign_extended, // NEW: Sign-extended branch offset
+    output reg [31:0] newPC
 );
 
-	// Set PC to zero on power-up
-   initial newPC = 32'b0;
+    // Set PC to zero on power-up
+    initial newPC = 32'b0;
 
-	always @ (posedge clock) begin
-		 if (clear) 
-			  newPC <= 32'b0;
-		 else if (enable) begin
-			  if (IncPC)
-					newPC <= newPC + 1;
-			  else
-					newPC <= inputPC;
-		 end
-	end
-
+    always @(posedge clock) begin
+        if (clear) 
+            newPC <= 32'b0;
+        else if (enable) begin
+            if (CON)  // Take branch if CON is high
+                newPC <= newPC + C_sign_extended;
+            else if (IncPC)
+                newPC <= newPC + 1;
+            else
+                newPC <= inputPC;
+        end
+    end
 endmodule
