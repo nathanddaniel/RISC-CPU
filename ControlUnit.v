@@ -1,122 +1,452 @@
 `timescale 1ns/10ps
 
 module ControlUnit (
-    output reg Gra, Grb, Grc, Rin, Rout, 
-    Yin, Zin, PCout, IncPC, MARin, MDRin, Read, Write, Clear,
-    ADD, AND_op, SHR, // Sample ALU operations
-    input [31:0] IR,  // Instruction Register
-    input Clock, Reset, Stop, Con_FF
+    input [31:0] IR,              							
+    input Clock, Reset, Stop, CON_FF, Interrupts,
+
+    //control Signals to/from Datapath
+    output reg Gra, Grb, Grc, Rin, Rout,
+    output reg Run, Clear,
+    output reg InPortout,         
+    output reg Read, Write,
+
+    //ALU and Operation Control Signals
+    output reg ADD, SUB, AND, OR,
+    output reg ROR, ROL, SHR, SHRA, SHL,
+    output reg ADDI, ANDI, ORI,
+    output reg DIV, MUL, NEG, NOT,
+
+    //Branch and Jump Instructions
+    output reg BRZR, BRNZ, BRMI, BRPL,
+    output reg JAR, JR,
+
+    //I/O Instructions
+    output reg IN, OUT,
+
+    //Move from HI/LO
+    output reg MFLO, MFHI,
+
+    //Special Instructions
+    output reg NOP, HALT,
+
+    //control Signals for Registers
+    output reg HIin, LOin, CONin,
+    output reg PCin, IRin, Yin, Zin,
+    output reg MARin, MDRin, OutPortin,
+    output reg Cout, BAout,
+
+    //output control signals
+    output reg PCout, MDRout,
+    output reg Zhighout, Zlowout,
+    output reg HIout, LOout
 );
 
-// Define state parameters for FSM
-parameter reset_state = 4'b0000, fetch0 = 4'b0001, fetch1 = 4'b0010, fetch2 = 4'b0011,
-          add3 = 4'b0100, add4 = 4'b0101, and3 = 4'b0110, and4 = 4'b0111, shr3 = 4'b1000, shr4 = 4'b1001;
+	//defining state parameters for FSM
+	//basically creating set of states for each part of the instruction processing
+	//provides a framework for the FSM to transition between states and helps assign control signals cleanly in a case(present_state) block
+	parameter 
+    reset_state = 8'b00000000, 
+    fetch0 = 8'b00000001, 
+    fetch1 = 8'b00000010, 
+    fetch2 = 8'b00000011,
 
-// Register to store current state
-reg [3:0] present_state = reset_state;  
+	 //ADD Instruction
+    add3 = 8'b00000100, 
+    add4 = 8'b00000101, 
+    add5 = 8'b00000110,
 
-// FSM - State Transition Logic
-always @(posedge Clock or posedge Reset)  
-begin
-    if (Reset) 
-        present_state <= reset_state;
-    else 
-        case (present_state)
-            reset_state: present_state <= fetch0;
-            fetch0: present_state <= fetch1;
-            fetch1: present_state <= fetch2;
-            fetch2: 
-                case (IR[31:27]) // Opcode decoding to determine execution states
-                    5'b00011: present_state <= add3;  // ADD instruction
-                    5'b00100: present_state <= and3;  // AND instruction
-                    5'b00101: present_state <= shr3;  // SHR instruction
-                    default: present_state <= reset_state; // Default case
-                endcase
-            add3: present_state <= add4;
-            add4: present_state <= reset_state;
-            and3: present_state <= and4;
-            and4: present_state <= reset_state;
-            shr3: present_state <= shr4;
-            shr4: present_state <= reset_state;
-        endcase
-end
+	 //SUB Instruction
+    sub3 = 8'b00000111, 
+    sub4 = 8'b00001000, 
+    sub5 = 8'b00001001,
 
-// FSM - Control Signal Assignments
-always @(present_state)  
-begin
-    // Default de-assert all signals
-    Gra <= 0; Grb <= 0; Grc <= 0; Rin <= 0; Rout <= 0; 
-    Yin <= 0; Zin <= 0; PCout <= 0; IncPC <= 0; MARin <= 0; MDRin <= 0; 
-    Read <= 0; Write <= 0; Clear <= 0;
-    ADD <= 0; AND_op <= 0; SHR <= 0;
+	 //MUL Instruction
+    mul3 = 8'b00001010, 
+    mul4 = 8'b00001011, 
+    mul5 = 8'b00001100, 
+    mul6 = 8'b00001101,
 
-    case (present_state)
-        // Reset state: initialize everything
-        reset_state: begin
-            Gra <= 0; Grb <= 0; Grc <= 0; Yin <= 0; 
-            Rin <= 0; Rout <= 0; Zin <= 0;
-        end
+	 //DIV Instruction
+    div3 = 8'b00001110, 
+    div4 = 8'b00001111, 
+    div5 = 8'b00010000, 
+    div6 = 8'b00010001,
 
-        // Fetch cycle
-        fetch0: begin
-            PCout <= 1;   // Put PC address on the bus
-            MARin <= 1;   // Store it in MAR
-            IncPC <= 1;   // Increment PC
-            Zin <= 1;     // Store incremented PC in Z register
-        end
-        
-        fetch1: begin
-            Zlowout <= 1; // Put Zlow (incremented PC) on the bus
-            PCin <= 1;    // Load incremented PC back into PC
-            Read <= 1;    // Read from memory
-            MDRin <= 1;   // Store fetched data in MDR
-        end
+	 //OR Instruction
+    or3 = 8'b00010010, 
+    or4 = 8'b00010011, 
+    or5 = 8'b00010100,
 
-        fetch2: begin
-            MDRout <= 1; // Put MDR contents on the bus
-            IRin <= 1;   // Load instruction into IR
-        end
+	 //AND Instruction
+    and3 = 8'b00010101, 
+    and4 = 8'b00010110, 
+    and5 = 8'b00010111,
 
-        // Execution: ADD instruction
-        add3: begin
-            Grb <= 1;  // Select register B
-            Rout <= 1; // Output register B onto the bus
-            Yin <= 1;  // Store in Y register
-        end
-        add4: begin
-            Grc <= 1; // Select register C
-            Rout <= 1; // Output register C onto the bus
-            ADD <= 1;  // Perform addition
-            Zin <= 1;  // Store result in Z register
-        end
+	 //SHL Instruction
+    shl3 = 8'b00011000, 
+    shl4 = 8'b00011001, 
+    shl5 = 8'b00011010,
 
-        // Execution: AND instruction
-        and3: begin
-            Grb <= 1;  // Select register B
-            Rout <= 1; // Output register B onto the bus
-            Yin <= 1;  // Store in Y register
-        end
-        and4: begin
-            Grc <= 1;  // Select register C
-            Rout <= 1; // Output register C onto the bus
-            AND_op <= 1; // Perform AND operation
-            Zin <= 1;   // Store result in Z register
-        end
+	 //SHR Instruction
+    shr3 = 8'b00011011, 
+    shr4 = 8'b00011100, 
+    shr5 = 8'b00011101,
 
-        // Execution: SHR instruction (Shift Right Logical)
-        shr3: begin
-            Grb <= 1;  // Select register B
-            Rout <= 1; // Output register B onto the bus
-            SHR <= 1;  // Perform SHR operation
-            Zin <= 1;  // Store result in Z register
-        end
-        shr4: begin
-            Grc <= 1;  // Select register C
-            Rout <= 1; // Output register C onto the bus
-            Zin <= 1;  // Store shifted result in Z register
-        end
+	 //ROL Instruction
+    rol3 = 8'b00011110, 
+    rol4 = 8'b00011111, 
+    rol5 = 8'b00100000,
 
-    endcase
-end
+	 //ROR Instruction
+    ror3 = 8'b00100001, 
+    ror4 = 8'b00100010, 
+    ror5 = 8'b00100011,
+
+	 //NEG Instruction
+    neg3 = 8'b00100100, 
+    neg4 = 8'b00100101, 
+    neg5 = 8'b00100110,
+
+	 //NOT Instruction
+    not3 = 8'b00100111, 
+    not4 = 8'b00101000, 
+    not5 = 8'b00101001,
+
+	 //Load (LD) Instruction
+    ld3 = 8'b00101010, 
+    ld4 = 8'b00101011, 
+    ld5 = 8'b00101100, 
+    ld6 = 8'b00101101, 
+    ld7 = 8'b00101110,
+
+	 //Load Immediate (LDI)
+    ldi3 = 8'b00101111, 
+    ldi4 = 8'b00110000, 
+    ldi5 = 8'b00110001,
+
+	 //Store (ST) Instruction
+    st3 = 8'b00110010, 
+    st4 = 8'b00110011, 
+    st5 = 8'b00110100, 
+    st6 = 8'b00110101, 
+    st7 = 8'b00110110,
+
+	 //ADDI Instruction
+    addi3 = 8'b00110111, 
+    addi4 = 8'b00111000, 
+    addi5 = 8'b00111001,
+
+	 //ANDI Instruction
+    andi3 = 8'b00111010, 
+    andi4 = 8'b00111011, 
+    andi5 = 8'b00111100,
+
+    //ORI Instruction
+    ori3 = 8'b00111101, 
+    ori4 = 8'b00111110, 
+    ori5 = 8'b00111111,
+
+	 //Branch Instructions (e.g., BRZR, BRNZ, etc.)
+    br3 = 8'b01000000, 
+    br4 = 8'b01000001, 
+    br5 = 8'b01000010, 
+    br6 = 8'b01000011, 
+    br7 = 8'b01000100,  
+
+	 //Jump Instructions (JR, JAR)
+    jr3 = 8'b01000101, 
+    jal3 = 8'b01000110, 
+    jal4 = 8'b01000111,
+
+	 //Move From HI/LO
+    mfhi3 = 8'b01001000, 
+    mflo3 = 8'b01001001,
+
+	 //Input and Output Instructions
+    in3 = 8'b01001010, 
+    out3 = 8'b01001011,
+
+	 //special Instructions
+    nop3 = 8'b01001100, 
+    halt3 = 8'b01001101;
+
+	// Register to store current state
+	reg [3:0] present_state = reset_state;  
+
+	// FSM - State Transition Logic
+	always @(posedge Clock or posedge Reset)  
+	begin
+		 if (Reset) 
+			  present_state <= reset_state;
+		 else 
+			  
+			  case (present_state)
+					reset_state	: present_state <= fetch0;
+					fetch0		: present_state <= fetch1;
+					fetch1		: present_state <= fetch2;
+					fetch2		: begin
+					
+							 case (IR[31:27])
+								  // ALU and Operation Instructions
+								  5'b00011: present_state <= add3;     // ADD
+								  5'b00100: present_state <= sub3;     // SUB
+								  5'b00101: present_state <= and3;     // AND
+								  5'b00110: present_state <= or3;      // OR
+								  5'b00111: present_state <= ror3;     // ROR
+								  5'b01000: present_state <= rol3;     // ROL
+								  5'b01001: present_state <= shr3;     // SHR
+								  5'b01010: present_state <= shra3;    // SHRA
+								  
+								  5'b01011: present_state <= shl3;     // SHL
+								  5'b01100: present_state <= addi3;    // ADDI
+								  5'b01101: present_state <= andi3;    // ANDI
+								  5'b01110: present_state <= ori3;     // ORI
+								  5'b01111: present_state <= div3;     // DIV
+								  5'b10000: present_state <= mul3;     // MUL
+								  5'b10001: present_state <= neg3;     // NEG
+								  5'b10010: present_state <= not3;     // NOT
+
+								  // Branch and Jump Instructions
+								  5'b10011: present_state <= br3;      // BRZR / BRNZ / BRMI / BRPL (use sub-opcode bits later)
+								  5'b10100: present_state <= jal3;     // JAR
+								  5'b10101: present_state <= jr3;      // JR
+
+								  // I/O Instructions
+								  5'b10110: present_state <= in3;      // IN
+								  5'b10111: present_state <= out3;     // OUT
+
+								  // Move from HI/LO
+								  5'b11000: present_state <= mflo3;    // MFLO
+								  5'b11001: present_state <= mfhi3;    // MFHI
+
+								  // Special Instructions
+								  5'b11010: present_state <= nop3;     // NOP
+								  5'b11011: present_state <= halt3;    // HALT
+
+								  // Load/Store Instructions
+								  5'b00000: present_state <= ld3;      // LD
+								  5'b00001: present_state <= ldi3;     // LDI
+								  5'b00010: present_state <= st3;      // ST
+
+								  default: present_state <= reset_state;
+							 endcase
+					end
+					
+					//add instruction
+					add3: present_state <= add4;
+					add4: present_state <= add5;
+					add5: present_state <= reset_state;
+					
+					//sub instruction
+					sub3: present_state <= sub4;
+					sub4: present_state <= sub5;
+					sub5: present_state <= reset_state;
+					
+					//mul instruction
+					mul3: present_state <= mul4;
+					mul4: present_state <= mul5;
+					mul5: present_state <= mul6;
+					mul6: present_state <= reset_state;
+					
+					//div instruction
+					div3: present_state <= div4;
+					div4: present_state <= div5;
+					div5: present_state <= div6;
+					div6: present_state <= reset_state;
+					
+					//or instruction
+					or3: present_state <= or4;
+					or4: present_state <= or5;
+					or5: present_state <= reset_state;
+					
+					//and instruction
+					and3: present_state <= and4;
+					and4: present_state <= and5;
+					and5: present_state <= reset_state;
+					
+					//shl instruction
+					shl3: present_state <= shl4;
+					shl4: present_state <= shl5;
+					shl5: present_state <= reset_state;
+					
+					//shr instruction
+					shr3: present_state <= shr4;
+					shr4: present_state <= shr5;
+					shr5: present_state <= reset_state;
+					
+					//rol instruction
+					rol3: present_state <= rol4;
+					rol4: present_state <= rol5;
+					rol5: present_state <= reset_state;
+					
+					//ror instruction
+					ror3: present_state <= ror4;
+					ror4: present_state <= ror5;
+					ror5: present_state <= reset_state;
+					
+					//neg instruction
+					neg3: present_state <= neg4;
+					neg4: present_state <= neg5;
+					neg5: present_state <= reset_state;
+					
+					//not instruction
+					not3: present_state <= not4;
+					not4: present_state <= not5;
+					not5: present_state <= reset_state;
+					
+					//ld instruction
+					ld3: present_state <= ld4;
+					ld4: present_state <= ld5;
+					ld5: present_state <= ld6;
+					ld6: present_state <= ld7;
+					ld7: present_state <= reset_state;
+					
+					//ldi instruction
+					ldi3: present_state <= ldi4;
+					ldi4: present_state <= ldi5;
+					ldi5: present_state <= reset_state;
+					
+					//st instruction
+					st3: present_state <= st4;
+					st4: present_state <= st5;
+					st5: present_state <= st6;
+					st6: present_state <= st7;
+					st7: present_state <= reset_state;
+					
+					//addi instruction
+					addi3: present_state <= addi4;
+					addi4: present_state <= addi5;
+					addi5: present_state <= reset_state;
+
+					//andi instruction
+					andi3: present_state <= andi4;
+					andi4: present_state <= andi5;
+					andi5: present_state <= reset_state;
+
+					//ori instruction
+					ori3: present_state <= ori4;
+					ori4: present_state <= ori5;
+					ori5: present_state <= reset_state;
+					
+					
+					//branching instructions
+					br3: present_state <= br4;
+					br4: present_state <= br5;
+					br5: present_state <= br6;
+					br6: present_state <= br7;
+					br7: present_state <= reset_state;
+
+					// JR Instruction
+					jr3: present_state <= reset_state;
+
+					// JAL Instruction
+					jal3: present_state <= jal4;
+					jal4: present_state <= reset_state;
+
+					// MFHI / MFLO
+					mfhi3: present_state <= reset_state;
+					mflo3: present_state <= reset_state;
+
+					// IN / OUT
+					in3: present_state <= reset_state;
+					out3: present_state <= reset_state;
+
+					// NOP
+					nop3: present_state <= reset_state;
+
+					// HALT
+					halt3: present_state <= halt3; // Loop forever in HALT
+
+					default: present_state <= reset_state;
+			  endcase
+	end
+
+	// FSM - Control Signal Assignments
+	always @(present_state)  
+	begin
+		 // Default de-assert all signals
+		 Gra <= 0; 			Grb <= 0; 		 Grc <= 0; 			Rin <= 0; 			Rout <= 0;
+		 BAout <= 0; 		Cout <= 0;		 Read <= 0; 		Write <= 0; 		MARin <= 0; 
+		 MDRin <= 0; 		MDRout <= 0;	 PCin <= 0; 		PCout <= 0; 		IRin <= 0; 
+		 IncPC <= 0;		Yin <= 0; 		 Zin <= 0; 			Zhighout <= 0; 	Zlowout <= 0;
+		 HIin <= 0; 		LOin <= 0; 		 HIout <= 0; 		LOout <= 0;			CONin <= 0; 
+		 Run <= 0; 			Clear <= 0;		 ADD <= 0; 			SUB <= 0; 			AND <= 0; 
+		 OR <= 0;			SHR <= 0; 		 SHRA <= 0; 		SHL <= 0; 			ROL <= 0; 
+		 ROR <= 0;			ADDI <= 0; 		 ANDI <= 0; 		ORI <= 0;			DIV <= 0; 
+		 MUL <= 0; 			NEG <= 0; 		 NOT <= 0;			BRZR <= 0; 			BRNZ <= 0; 
+		 BRMI <= 0; 		BRPL <= 0;		 JAR <= 0; 			JR <= 0;				IN <= 0; 
+		 OUT <= 0; 			InPortout <= 0; OutPortin <= 0;	MFLO <= 0; 			MFHI <= 0; 
+		 NOP <= 0; 			HALT <= 0;
+
+		 case (present_state)
+			  // Reset state: initialize everything
+			  reset_state: begin
+					Gra <= 0; 	Grb <= 0;	Grc <= 0; 
+					Rin <= 0;	Rout <= 0; 
+					Yin <= 0;	Zin <= 0;
+					
+					PCin <= 1;        //setting PC to 0
+					Clear <= 1;       //clearing internal register states, if needed
+					Run <= 1;         //enabling operation		  
+			  end
+
+			  // Fetch cycle
+			  fetch0: begin
+					PCout <= 1;   //outputting the PC onto the bus
+					MARin <= 1;   //loading the bus value into MAR
+					IncPC <= 1;   //incrementing the PC internally
+			  end
+			  
+			  fetch1: begin
+					Read <= 1;    // Read from memory
+					MDRin <= 1;   // Store fetched data in MDR
+			  end
+
+			  fetch2: begin
+					MDRout <= 1; // Put MDR contents on the bus
+					IRin <= 1;   // Load instruction into IR
+			  end
+
+			  // Execution: ADD instruction
+			  add3: begin
+					Grb <= 1;  // Select register B
+					Rout <= 1; // Output register B onto the bus
+					Yin <= 1;  // Store in Y register
+			  end
+			  add4: begin
+					Grc <= 1; // Select register C
+					Rout <= 1; // Output register C onto the bus
+					ADD <= 1;  // Perform addition
+					Zin <= 1;  // Store result in Z register
+			  end
+
+			  // Execution: AND instruction
+			  and3: begin
+					Grb <= 1;  // Select register B
+					Rout <= 1; // Output register B onto the bus
+					Yin <= 1;  // Store in Y register
+			  end
+			  and4: begin
+					Grc <= 1;  // Select register C
+					Rout <= 1; // Output register C onto the bus
+					AND_op <= 1; // Perform AND operation
+					Zin <= 1;   // Store result in Z register
+			  end
+
+			  // Execution: SHR instruction (Shift Right Logical)
+			  shr3: begin
+					Grb <= 1;  // Select register B
+					Rout <= 1; // Output register B onto the bus
+					SHR <= 1;  // Perform SHR operation
+					Zin <= 1;  // Store result in Z register
+			  end
+			  shr4: begin
+					Grc <= 1;  // Select register C
+					Rout <= 1; // Output register C onto the bus
+					Zin <= 1;  // Store shifted result in Z register
+			  end
+
+		 endcase
+	end
 
 endmodule
