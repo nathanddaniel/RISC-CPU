@@ -380,71 +380,384 @@ module ControlUnit (
 
 		 case (present_state)
 			  // Reset state: initialize everything
-			  reset_state: begin
-					Gra <= 0; 	Grb <= 0;	Grc <= 0; 
-					Rin <= 0;	Rout <= 0; 
-					Yin <= 0;	Zin <= 0;
+			reset_state: begin
+				Gra <= 0; 	Grb <= 0;	Grc <= 0; 
+				Rin <= 0;	Rout <= 0; 
+				Yin <= 0;	Zin <= 0;
 					
-					PCin <= 1;        //setting PC to 0
-					Clear <= 1;       //clearing internal register states, if needed
-					Run <= 1;         //enabling operation		  
-			  end
+				PCin <= 1;        //setting PC to 0
+				Clear <= 1;       //clearing internal register states, if needed
+				Run <= 1;         //enabling operation		  
+			end
 
-			  // Fetch cycle
-			  fetch0: begin
-					PCout <= 1;   //outputting the PC onto the bus
-					MARin <= 1;   //loading the bus value into MAR
-					IncPC <= 1;   //incrementing the PC internally
-			  end
+			// Fetch cycle
+			fetch0: begin
+				PCout <= 1;   //outputting the PC onto the bus
+				MARin <= 1;   //loading the bus value into MAR
+				IncPC <= 1;   //incrementing the PC internally
+			end
 			  
-			  fetch1: begin
-					Read <= 1;    // Read from memory
-					MDRin <= 1;   // Store fetched data in MDR
-			  end
+			fetch1: begin
+				Read <= 1;    // Read from memory
+				MDRin <= 1;   // Store fetched data in MDR
+			end
 
-			  fetch2: begin
-					MDRout <= 1; // Put MDR contents on the bus
-					IRin <= 1;   // Load instruction into IR
-			  end
+			fetch2: begin
+				MDRout <= 1; // Put MDR contents on the bus
+				IRin <= 1;   // Load instruction into IR
+			end
 
-			  // Execution: ADD instruction
-			  add3: begin
-					Grb <= 1;  // Select register B
-					Rout <= 1; // Output register B onto the bus
-					Yin <= 1;  // Store in Y register
-			  end
-			  add4: begin
-					Grc <= 1; // Select register C
-					Rout <= 1; // Output register C onto the bus
-					ADD <= 1;  // Perform addition
-					Zin <= 1;  // Store result in Z register
-			  end
+            //Executing the ADD instruction
+			add3: begin
+				Grb <= 1;           // selecting register B
+				Rout <= 1;          // outputting register B onto the bus
+				Yin <= 1;           // storing in Y register
+			end
+			
+            add4: begin
+				Grc <= 1;           // selecting register C
+				Rout <= 1;          // outputting register C onto the bus
+				ADD <= 1;           // performing addition
+				Zin <= 1;           // storing result in Z register
+			end
 
-			  // Execution: AND instruction
-			  and3: begin
-					Grb <= 1;  // Select register B
-					Rout <= 1; // Output register B onto the bus
-					Yin <= 1;  // Store in Y register
-			  end
-			  and4: begin
-					Grc <= 1;  // Select register C
-					Rout <= 1; // Output register C onto the bus
-					AND_op <= 1; // Perform AND operation
-					Zin <= 1;   // Store result in Z register
-			  end
+            add5: begin
+                Zlowout <= 1;
+                Gra <= 1;
+                Rin <= 1;
+            end
 
-			  // Execution: SHR instruction (Shift Right Logical)
-			  shr3: begin
-					Grb <= 1;  // Select register B
-					Rout <= 1; // Output register B onto the bus
-					SHR <= 1;  // Perform SHR operation
-					Zin <= 1;  // Store result in Z register
-			  end
-			  shr4: begin
-					Grc <= 1;  // Select register C
-					Rout <= 1; // Output register C onto the bus
-					Zin <= 1;  // Store shifted result in Z register
-			  end
+            // Execution: SUB instruction
+            sub3: begin
+                Grb <= 1;
+                Rout <= 1;
+                Yin <= 1;
+            end
+
+            sub4: begin
+                Grc <= 1;     // Select Rc
+                Rout <= 1;     // Put Rc on bus
+                SUB <= 1;     // Perform subtraction in ALU
+                Zin <= 1;     // Store result into Z
+            end
+
+            sub5: begin
+                Zlowout <= 1;   // Output from Zlow
+                Gra <= 1;   // Select Ra (destination)
+                Rin <= 1;   // Store result in Ra
+            end
+            
+			// Execution: AND instruction
+			and3: begin
+				Grb <= 1;  // Select register B
+				Rout <= 1; // Output register B onto the bus
+				Yin <= 1;  // Store in Y register
+			end
+			
+            and4: begin
+				Grc <= 1;  // Select register C
+				Rout <= 1; // Output register C onto the bus
+				AND_op <= 1; // Perform AND operation
+				Zin <= 1;   // Store result in Z register
+			end
+
+            and5: begin
+                Zlowout <= 1;   // Output result from Zlow
+                Gra <= 1;   // Select destination register Ra
+                Rin <= 1;   // Store result into Ra
+            end
+
+            //Executing the OR instruction
+            or3: begin
+                Grb <= 1;    // Select Rb (R1)
+                Rout <= 1;    
+                Yin <= 1;    // Store R1 into Y
+            end
+
+            or4: begin
+                Grc <= 1;    // Select Rc (R0)
+                Rout <= 1;
+                OR <= 1;    // Trigger OR operation in ALU
+                Zin <= 1;    // Store result in Z
+            end
+
+            or5: begin
+                Zlowout <= 1; // Output from Zlow
+                Gra <= 1; // Select Ra (R5)
+                Rin <= 1; // Store result into R5
+            end   
+
+            //Execution: ROR instruction
+            ror3: begin
+                Grb <= 1;    // Select Rb (R0)
+                Rout <= 1;    
+                Yin <= 1;    // Store into Y
+            end
+
+            ror4: begin
+                Grc <= 1;    // Select Rc (R1)
+                Rout <= 1;
+                ROR <= 1;    // Trigger Rotate Right in ALU
+                Zin <= 1;    // Store result in Z register
+            end
+
+            ror5: begin
+                Zlowout <= 1; // Output from Zlow
+                Gra <= 1; // Select destination Ra (R2)
+                Rin <= 1; // Write into Ra
+            end
+
+            //Execution: ROL instruction 
+            rol3: begin
+                Grb <= 1;     // Select Rb (R0)
+                Rout <= 1;     
+                Yin <= 1;     // Store R0 into Y register
+            end
+
+            rol4: begin
+                Grc <= 1;     // Select Rc (R1)
+                Rout <= 1;
+                ROL <= 1;     // Enable ROL control line in ALU
+                Zin <= 1;     // Store result from ALU into Z
+            end
+
+            rol5: begin
+                Zlowout <= 1;  // Output lower 32 bits from Z
+                Gra <= 1;  // Select Ra (R3)
+                Rin <= 1;  // Load result into R3
+            end
+
+            //Execution: SHR instruction
+            shr3: begin
+                Grb <= 1;     // Select Rb (R3)
+                Rout <= 1;
+                Yin <= 1;     // Load R3 into Y register
+            end
+
+            shr4: begin
+                Grc <= 1;     // Select Rc (R1) — shift amount
+                Rout <= 1;
+                SHR <= 1;     // Trigger SHR in ALU
+                Zin <= 1;     // Store result in Z
+            end
+
+            shr5: begin
+                Zlowout <= 1;  // Output lower half of Z
+                Gra <= 1;  // Select Ra (R3)
+                Rin <= 1;  // Store result into R3
+            end
+
+            //Execution: SHRA instruction
+            shra3: begin
+                Grb <= 1;     // Select Rb (R4)
+                Rout <= 1;
+                Yin <= 1;     // Store value in Y
+            end
+
+            shra4: begin
+                Grc <= 1;     // Select Rc (R1)
+                Rout <= 1;
+                SHRA <= 1;     // Activate Arithmetic Shift Right
+                Zin <= 1;     // Store ALU output in Z
+            end
+            
+            shra5: begin
+                Zlowout <= 1;  // Output result from Zlow
+                Gra <= 1;  // Select Ra (R2)
+                Rin <= 1;  // Store into destination register
+            end
+
+            //Execution: SHL instruction
+            shl3: begin
+                Grb <= 1;     // Select Rb (R3)
+                Rout <= 1;
+                Yin <= 1;     // Store into Y
+            end
+
+            shl4: begin
+                Grc <= 1;     // Select Rc (R1)
+                Rout <= 1;
+                SHL <= 1;     // Trigger shift-left logic in ALU
+                Zin <= 1;     // Store result in Z register
+            end
+
+            shl5: begin
+                Zlowout <= 1;  // Output Zlow to bus
+                Gra <= 1;  // Select Ra (R2)
+                Rin <= 1;  // Load result into destination
+            end
+
+            //Execution: ADDI instruction
+            addi3: begin
+                Grb <= 1;     // Select R4
+                Rout <= 1;
+                Yin <= 1;     // Load R4 into Y register
+            end
+
+            //Execution: ANDI instruction
+            addi4: begin
+                Cout <= 1;     // Output constant C (from sign-extended immediate)
+                ADD <= 1;     // Trigger addition operation
+                Zin <= 1;     // Store result in Z
+            end
+
+            addi5: begin
+                Zlowout <= 1;  // Output Zlow to the bus
+                Gra <= 1;  // Select Ra (R4)
+                Rin <= 1;  // Store result into R4
+            end
+
+            //Execution: ORI instruction
+            ori3: begin
+                Grb <= 1;     // Select R2
+                Rout <= 1;
+                Yin <= 1;     // Store R2 into Y
+            end
+
+            ori4: begin
+                Cout <= 1;     // Output sign-extended constant
+                OR <= 1;     // Trigger bitwise OR in ALU
+                Zin <= 1;     // Store result in Z register
+            end
+
+            ori5: begin
+                Zlowout <= 1;  // Output result from Zlow
+                Gra <= 1;  // Select Ra (R4)
+                Rin <= 1;  // Load result into R4
+            end
+
+            //Execution: DIV instruction
+            div3: begin
+                Grb <= 1;    // Rb = dividend (R6)
+                Rout <= 1;    
+                Yin <= 1;    // Store into Y
+            end
+
+            div4: begin
+                Grc <= 1;    // Rc = divisor (R5)
+                Rout <= 1;
+                DIV <= 1;    // Trigger division
+                Zin <= 1;    // Store result in Z (Z = {rem, quot})
+            end
+
+            div5: begin
+                Zhighout <= 1; // Z[63:32] = remainder
+                HIin <= 1; // Store in HI
+            end
+
+            div6: begin
+                Zlowout <= 1;  // Z[31:0] = quotient
+                LOin <= 1;  // Store in LO
+            end
+
+            //Execution: MUL instruction
+            mul3: begin
+                Grb   <= 1;     // Select source Rb
+                Rout  <= 1;     // Output Rb
+                Yin   <= 1;     // Store into Y
+            end
+
+            mul4: begin
+                Grc <= 1;     // You may still need to select Rc, even if it's zero
+                Rout <= 1;     // Output Rc (value = 0)
+                MUL <= 1;     // Trigger ALU multiplication
+                ZLowIn <= 1;   // Store result into Zlow
+                ZHighIn <= 1;   // You must still capture Zhigh (to clear it), but won't use it
+            end
+
+            mul5: begin
+                Zlowout <= 1;   // Output result from Zlow
+                Gra <= 1;   // Select destination register Ra
+                Rin <= 1;   // Load result into Ra
+            end
+
+            //Execution: NEG instruction
+            neg3: begin
+                Grb  <= 1;     // Select source register R4
+                Rout <= 1;
+                Yin  <= 1;     // Load into Y register
+            end
+
+            neg4: begin
+                NEG  <= 1;     // Trigger NEG operation in ALU
+                Zin  <= 1;     // Store result in Z
+            end
+
+            neg5: begin
+                Zlowout <= 1;  // Output result from Zlow
+                Gra     <= 1;  // Select destination register (R4)
+                Rin     <= 1;  // Store result into R4
+            end
+
+            //Execution: NOT instruction
+            not3: begin
+                Grb  <= 1;     // Select R4 (source)
+                Rout <= 1;
+                Yin  <= 1;     // Store R4 into Y register
+            end
+
+            not4: begin
+                NOT  <= 1;     // Enable NOT operation in ALU
+                Zin  <= 1;     // Store result into Z
+            end
+
+            not5: begin
+                Zlowout <= 1;  // Output from Zlow register
+                Gra     <= 1;  // Select Ra (R4)
+                Rin     <= 1;  // Load result into R4
+            end
+
+            //Execution: BRZR instruction (not needed)
+            //Execution: BRNZ instruction (not needed)
+            //Execution: INPUT/OUTPUT instruction (not needed)
+
+            //Execution: BRMI instruction
+            br3: begin
+                Gra    <= 1;    // Select Ra (R3)
+                Rout   <= 1;    // Output R3 to bus
+                CONin  <= 1;    // Trigger CON_FF evaluation
+            end
+
+            br4: begin
+                // No control signals; transition state only
+            end
+
+            br5: begin
+                PCin    <= 1;    // Enable PC update
+                Cout    <= 1;    // Output constant offset
+            end
+
+            br6: begin
+                // Can be a pause state to allow PC update
+            end
+
+            br7: begin
+                // Transition to fetch0 handled in FSM transition logic
+            end
+            
+            //Execution: BRPL instruction
+            br3: begin
+                Gra    <= 1;     // Select R4 (Ra)
+                Rout   <= 1;     // Output R4 onto bus
+                CONin  <= 1;     // Trigger evaluation in CON_FF
+            end
+
+            br4: begin
+                // No control signals needed
+            end
+
+            br5: begin
+                Cout  <= 1;     // Output sign-extended constant
+                PCin  <= 1;     // Update Program Counter
+            end
+
+            br6: begin
+                // Idle state for safe update
+            end
+
+            br7: begin
+                // Transition to fetch0 handled in FSM controller
+            end
 
 		 endcase
 	end
