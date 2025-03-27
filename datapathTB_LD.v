@@ -153,7 +153,6 @@ module datapathTB_LD;
 					 Cout <= 0;       		 ZLowIn <= 0;
                 #10 Zlowout <= 1;       MARin <= 1; 
                 #10 Zlowout <= 0;     	 #5 MARin <= 0;	// Added 5ns delay so value can latch on posedge
-					 #10 Read <= 1;          MDRin <= 1;
             end
 				/*
 				The 5ns delay and maybe just even the 10 ns delay seems to cause issues for the read and write signals below
@@ -161,7 +160,8 @@ module datapathTB_LD;
 				happening in T5. Somewhere along the way the signals just dont drive in waveform diagram.
 				*/
 			  T6: begin
-					 #10 Read <= 0;        	 MDRin <= 0;		 
+                    Read <= 1;          MDRin <= 1;
+					#10 Read <= 0;        	 MDRin <= 0;		 
             end
 
 			  T7: begin 
