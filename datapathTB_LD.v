@@ -1,7 +1,6 @@
 //NOT TESTED
 /* TO DO:
-    Currently the Zlowout and MARin values in T5 are being over-ridden to be redundant and not used
-    This likely leads to the issue seen in the Wave Diagram with the incorrect value in the Address register 
+	Fix T6 so that signals are actually driven for Read and MDRin
 */
 `timescale 1ns/1ps
 
@@ -126,20 +125,18 @@ module datapathTB_LD;
 					 CONin <= 0;
             end
 				
-				T0: begin 
-                #10 MARin <= 1;         IncPC <= 1;  	  PCout <= 1;   ZLowIn <= 1;
-                
+			T0: begin 
+                #10 MARin <= 1;     IncPC <= 1; PCout <= 1; ZLowIn <= 1;  
             end
 
-			  T1: begin 
-					 PCout <= 0;     			 MARin <= 0;      	ZLowIn <= 0;
-                #10 Zlowout <= 1;       PCin <= 1;       	Read <= 1;    	MDRin <= 1;  
-                
+			T1: begin 
+			    PCout <= 0;         MARin <= 0; ZLowIn <= 0;
+                #10 Zlowout <= 1;   PCin <= 1;  Read <= 1;  MDRin <= 1;  
             end
 
-			  T2: begin 
-					 Zlowout <= 0;   			 PCin <= 0;      Read <= 0; MDRin <= 0;    IncPC <= 0;
-                #10 MDRout <= 1;        IRin <= 1; 
+			T2: begin 
+				Zlowout <= 0;   	PCin <= 0;   Read <= 0; MDRin <= 0; IncPC <= 0;
+                #10 MDRout <= 1;    IRin <= 1; 
             end
 
 			  T3: begin 
@@ -153,18 +150,21 @@ module datapathTB_LD;
             end
 
 			  T5: begin 
-					 Cout <= 0;       		 ZLowIn <= 0;  		// Fixed incorrect Zin assignment
+					 Cout <= 0;       		 ZLowIn <= 0;
                 #10 Zlowout <= 1;       MARin <= 1; 
-                Zlowout <= 0;     		 MARin <= 0;
+                #10 Zlowout <= 0;     	 #5 MARin <= 0;	// Added 5ns delay so value can latch on posedge
+					 #10 Read <= 1;          MDRin <= 1;
             end
-
+				/*
+				The 5ns delay and maybe just even the 10 ns delay seems to cause issues for the read and write signals below
+				This might be because the delays are seperate from the clock cycle, meaning that T6 begins regardless of what was
+				happening in T5. Somewhere along the way the signals just dont drive in waveform diagram.
+				*/
 			  T6: begin
-					 #10 Zlowout <= 0;     	 MARin <= 0;
-                Read <= 1;              MDRin <= 1;		 
+					 #10 Read <= 0;        	 MDRin <= 0;		 
             end
 
 			  T7: begin 
-					 #10 Read <= 0;        	 MDRin <= 0;  			// Fixed missing reset
                 Gra <= 1;               MDRout <= 1;     	Rin <= 1;
                 #10 Gra <= 0;           MDRout <= 0;     	Rin <= 0;
             end
