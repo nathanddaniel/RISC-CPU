@@ -22,7 +22,7 @@ module IR (
     end
 	
 	
-	always @(*) begin
+	always @(posedge Clock) begin
       Opcode = IR[31:27];
 
       //default values

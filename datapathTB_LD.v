@@ -1,7 +1,4 @@
-//NOT TESTED
-/* TO DO:
-	Fix T6 so that signals are actually driven for Read and MDRin
-*/
+
 `timescale 1ns/1ps
 
 module datapathTB_LD;
@@ -126,47 +123,43 @@ module datapathTB_LD;
             end
 				
 			T0: begin 
-                #10 MARin <= 1;     IncPC <= 1; PCout <= 1; ZLowIn <= 1;  
+                    MARin <= 1;     IncPC <= 1; PCout <= 1; ZLowIn <= 1; 
+ 
             end
 
 			T1: begin 
-			    PCout <= 0;         MARin <= 0; ZLowIn <= 0;
-                #10 Zlowout <= 1;   PCin <= 1;  Read <= 1;  MDRin <= 1;  
+					     MARin <= 0;     IncPC <= 0; PCout <= 0; ZLowIn <= 0;  
+						  Zlowout <= 1; PCin <= 1; Read <= 1; MDRin <= 1;
             end
 
 			T2: begin 
-				Zlowout <= 0;   	PCin <= 0;   Read <= 0; MDRin <= 0; IncPC <= 0;
-                #10 MDRout <= 1;    IRin <= 1; 
+						  Zlowout <= 0; PCin <= 0; Read <= 0; MDRin <= 0;
+                    MDRout <= 1;    IRin <= 1; 
             end
 
 			  T3: begin 
-					 MDRout <= 0;     		 IRin <= 0;
-                #10 Grb <= 1;           BAout <= 1;      	Yin <= 1; 
+			  			  MDRout <= 0;     	IRin <= 0;
+                    Grb <= 1;          BAout <= 1;      			Yin <= 1;						
             end
 
 			  T4: begin 
-					 Grb <= 0;         		 BAout <= 0;       	Yin <= 0;
-                #10 Cout <= 1;          opcode <= 5'b00011;   	ZLowIn <= 1;  // Fixed naming and register assignment
+			          Grb <= 0;         	BAout <= 0;       		Yin <= 0;
+                   Cout <= 1;          opcode <= 5'b00011;   	ZLowIn <= 1;
             end
 
 			  T5: begin 
-					 Cout <= 0;       		 ZLowIn <= 0;
-                #10 Zlowout <= 1;       MARin <= 1; 
-                #10 Zlowout <= 0;     	 #5 MARin <= 0;	// Added 5ns delay so value can latch on posedge
+			  		 Cout <= 0;          ZLowIn <= 0;
+                Zlowout <= 1;       MARin <= 1; 
             end
-				/*
-				The 5ns delay and maybe just even the 10 ns delay seems to cause issues for the read and write signals below
-				This might be because the delays are seperate from the clock cycle, meaning that T6 begins regardless of what was
-				happening in T5. Somewhere along the way the signals just dont drive in waveform diagram.
-				*/
+
 			  T6: begin
-                    Read <= 1;          MDRin <= 1;
-					#10 Read <= 0;        	 MDRin <= 0;		 
+					 Zlowout <= 0;       MARin <= 0;
+                Read <= 1;          MDRin <= 1;		 
             end
 
 			  T7: begin 
-                Gra <= 1;               MDRout <= 1;     	Rin <= 1;
-                #10 Gra <= 0;           MDRout <= 0;     	Rin <= 0;
+					 Read <= 0;        	   MDRin <= 0;
+                Gra <= 1;              MDRout <= 1;     	Rin <= 1;
             end
 		endcase
 	end
