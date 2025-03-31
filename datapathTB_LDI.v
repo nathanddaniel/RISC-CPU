@@ -1,0 +1,114 @@
+
+`timescale 1ns/1ps
+
+module datapathTB_LDI;
+
+    reg clock;
+    reg clear;
+    reg PCout, Zhighout, Zlowout, MDRout; 
+    reg MARin, PCin, MDRin, IRin, Yin, Zin;
+    reg IncPC, Read, Write;
+    reg Gra, Grb, Grc, BAout;
+    reg [4:0] opcode;
+    reg HIin, LOin, ZHighIn, ZLowIn;
+    reg [8:0] Address;    
+    reg [31:0] Mdatain;     
+	reg Rout, Rin;
+	reg Cout, HIout, LOout, Yout, InPortout;
+	reg CONin;
+	reg [31:0] external_input;
+	reg OutPortin;
+
+    wire R0out, R1out, R2out, R3out, R4out, R5out, R6out, R7out;
+    wire R8out, R9out, R10out, R11out, R12out, R13out, R14out, R15out;
+	wire CON_out;
+	wire [31:0] external_output;
+	 
+	parameter Default = 4'b0000, T0 = 4'b0001, T1 = 4'b0010, T2 = 4'b0011, T3 = 4'b0100, T4 = 4'b0101, T5 = 4'b0110;
+    
+	reg [3:0] Present_state = Default;
+	 
+    DataPath uut (
+        .clock(clock), .clear(clear), .PCout(PCout), .Zhighout(Zhighout), .Zlowout(Zlowout), 
+        .MDRout(MDRout), .MARin(MARin), .Rin(Rin), .PCin(PCin), .MDRin(MDRin), .IRin(IRin), 
+        .Yin(Yin), .IncPC(IncPC), .Read(Read), .Write(Write), .Gra(Gra), .Grb(Grb), .Grc(Grc),
+        .opcode(opcode), .HIin(HIin), .LOin(LOin), .ZHighIn(ZHighIn), .ZLowIn(ZLowIn), 
+        .Address(Address), .Mdatain(Mdatain), .BAout(BAout), .R0out(R0out), .R1out(R1out), 
+        .R2out(R2out), .R3out(R3out), .R4out(R4out), .R5out(R5out), .R6out(R6out), .R7out(R7out),
+        .R8out(R8out), .R9out(R9out), .R10out(R10out), .R11out(R11out), .R12out(R12out), 
+        .R13out(R13out), .R14out(R14out), .R15out(R15out), .HIout(HIout), .LOout(LOout),
+        .Yout(Yout), .InPortout(InPortout), .Cout(Cout), .Rout(Rout), .CONin(CONin),
+		.InPortData(external_input), .OutPortData(external_output), .OutPortin(OutPortin)        
+    );
+
+    
+   initial begin
+        clock = 0;
+	    clear = 0;
+		//case 1 
+	    //uut.PC_inst.newPC = 32'h02;
+		//case2
+		uut.PC_inst.newPC = 32'h03;
+		uut.r2.BusMuxIn = 32'h78;
+   end
+	 
+	always 
+		#10  clock <= ~clock;
+		
+	always @(posedge clock) begin
+    case (Present_state)
+        Default: Present_state <= T0;
+        T0:      Present_state <= T1;
+        T1:      Present_state <= T2;
+        T2:      Present_state <= T3;
+        T3:      Present_state <= T4;
+        T4:      Present_state <= T5;
+        T5:      Present_state <= Default; 
+		endcase
+	end 
+	
+	always @(Present_state) begin
+			case (Present_state)
+				Default: begin
+                PCout <= 0;         Zhighout <= 0;      Zlowout <= 0;      MDRout <= 0;
+                MARin <= 0;         PCin <= 0;          MDRin <= 0;        IRin <= 0;          
+                Yin <= 0;           IncPC <= 0;         Read <= 0;         Write <= 0;
+                Gra <= 0;           Grb <= 0;           Grc <= 0;          opcode <= 0;
+                HIin <= 0;          LOin <= 0;          ZHighIn <= 0;      ZLowIn <= 0; 
+                Address <= 9'h0;    Mdatain <= 32'h0;   Cout <= 0;         CONin <= 0;
+            end
+				
+			T0: begin 
+                MARin <= 1;			IncPC <= 1;			PCout <= 1;			ZLowIn <= 1; 
+ 
+            end
+
+			T1: begin 
+				MARin <= 0;			IncPC <= 0; 		PCout <= 0;			ZLowIn <= 0;  
+				Zlowout <= 1;		PCin <= 1; 			Read <= 1; 			MDRin <= 1;
+            end
+
+			T2: begin 
+				Zlowout <= 0;		PCin <= 0; 			Read <= 0; 			MDRin <= 0;
+                MDRout <= 1;        IRin <= 1; 
+            end
+
+			  T3: begin 
+			  	MDRout <= 0;     	IRin <= 0;
+                Grb <= 1;           BAout <= 1;      	Yin <= 1;						
+            end
+
+			  T4: begin 
+			    Grb <= 0;         	BAout <= 0;       		Yin <= 0;
+                Cout <= 1;          opcode <= 5'b00011;   	ZLowIn <= 1;
+            end
+
+			  T5: begin 
+			  	Cout <= 0;          ZLowIn <= 0;
+                Zlowout <= 1;       Gra <= 1;			    Rin <= 1; 
+            end
+
+		endcase
+	end
+
+endmodule
