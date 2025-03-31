@@ -32,6 +32,7 @@ module ControlUnit (
     //control Signals for Registers
     output reg HIin, LOin, CONin,
     output reg PCin, IRin, Yin, Zin,
+    output reg ZHighIn, ZLowIn,
     output reg MARin, MDRin, OutPortin,
     output reg Cout, BAout,
 
@@ -50,128 +51,134 @@ module ControlUnit (
     fetch1 = 8'b00000010, 
     fetch2 = 8'b00000011,
 
-	 //ADD Instruction
-    add3 = 8'b00000100, 
-    add4 = 8'b00000101, 
+	//ADD Instruction
+    add3 = 8'b00000100,
+    add4 = 8'b00000101,
     add5 = 8'b00000110,
 
-	 //SUB Instruction
-    sub3 = 8'b00000111, 
-    sub4 = 8'b00001000, 
+	//SUB Instruction
+    sub3 = 8'b00000111,
+    sub4 = 8'b00001000,
     sub5 = 8'b00001001,
 
-	 //MUL Instruction
-    mul3 = 8'b00001010, 
-    mul4 = 8'b00001011, 
-    mul5 = 8'b00001100, 
-    mul6 = 8'b00001101,
+    //AND Instruction
+    and3 = 8'b00001010, 
+    and4 = 8'b00001011, 
+    and5 = 8'b00001100,
 
-	 //DIV Instruction
-    div3 = 8'b00001110, 
-    div4 = 8'b00001111, 
-    div5 = 8'b00010000, 
-    div6 = 8'b00010001,
+    //OR Instruction
+    or3 = 8'b00001101, 
+    or4 = 8'b00001110, 
+    or5 = 8'b00001111,
 
-	 //OR Instruction
-    or3 = 8'b00010010, 
-    or4 = 8'b00010011, 
-    or5 = 8'b00010100,
+    //ROR Instruction
+    ror3 = 8'b00010000, 
+    ror4 = 8'b00010001, 
+    ror5 = 8'b00010010,
 
-	 //AND Instruction
-    and3 = 8'b00010101, 
-    and4 = 8'b00010110, 
-    and5 = 8'b00010111,
+    //ROL Instruction
+    rol3 = 8'b00010011, 
+    rol4 = 8'b00010100, 
+    rol5 = 8'b00010101,
 
-	 //SHL Instruction
-    shl3 = 8'b00011000, 
-    shl4 = 8'b00011001, 
-    shl5 = 8'b00011010,
+    //SHR Instruction
+    shr3 = 8'b00010110, 
+    shr4 = 8'b00010111, 
+    shr5 = 8'b00011000,
 
-	 //SHR Instruction
-    shr3 = 8'b00011011, 
-    shr4 = 8'b00011100, 
-    shr5 = 8'b00011101,
+    //SHRA Instruction
+    shra3 = 8'b00011001,
+    shra4 = 8'b00011010,
+    shra5 = 8'b00011011,
 
-	 //ROL Instruction
-    rol3 = 8'b00011110, 
-    rol4 = 8'b00011111, 
-    rol5 = 8'b00100000,
+    //SHL Instruction
+    shl3 = 8'b00011100, 
+    shl4 = 8'b00011101, 
+    shl5 = 8'b00011110,
 
-	 //ROR Instruction
-    ror3 = 8'b00100001, 
-    ror4 = 8'b00100010, 
-    ror5 = 8'b00100011,
+    //ADDI Instruction
+    addi3 = 8'b00011111, 
+    addi4 = 8'b00100000, 
+    addi5 = 8'b00100001,
 
-	 //NEG Instruction
-    neg3 = 8'b00100100, 
-    neg4 = 8'b00100101, 
-    neg5 = 8'b00100110,
-
-	 //NOT Instruction
-    not3 = 8'b00100111, 
-    not4 = 8'b00101000, 
-    not5 = 8'b00101001,
-
-	 //Load (LD) Instruction
-    ld3 = 8'b00101010, 
-    ld4 = 8'b00101011, 
-    ld5 = 8'b00101100, 
-    ld6 = 8'b00101101, 
-    ld7 = 8'b00101110,
-
-	 //Load Immediate (LDI)
-    ldi3 = 8'b00101111, 
-    ldi4 = 8'b00110000, 
-    ldi5 = 8'b00110001,
-
-	 //Store (ST) Instruction
-    st3 = 8'b00110010, 
-    st4 = 8'b00110011, 
-    st5 = 8'b00110100, 
-    st6 = 8'b00110101, 
-    st7 = 8'b00110110,
-
-	 //ADDI Instruction
-    addi3 = 8'b00110111, 
-    addi4 = 8'b00111000, 
-    addi5 = 8'b00111001,
-
-	 //ANDI Instruction
-    andi3 = 8'b00111010, 
-    andi4 = 8'b00111011, 
-    andi5 = 8'b00111100,
+    //ANDI Instruction
+    andi3 = 8'b00100010, 
+    andi4 = 8'b00100011, 
+    andi5 = 8'b00100100,
 
     //ORI Instruction
-    ori3 = 8'b00111101, 
-    ori4 = 8'b00111110, 
-    ori5 = 8'b00111111,
+    ori3 = 8'b00100101, 
+    ori4 = 8'b00100110, 
+    ori5 = 8'b00100111,
 
-	 //Branch Instructions (e.g., BRZR, BRNZ, etc.)
-    br3 = 8'b01000000, 
-    br4 = 8'b01000001, 
-    br5 = 8'b01000010, 
-    br6 = 8'b01000011, 
-    br7 = 8'b01000100,  
+    //DIV Instruction
+    div3 = 8'b00101000, 
+    div4 = 8'b00101001,
+    div5 = 8'b00101010, 
+    div6 = 8'b00101011,
 
-	 //Jump Instructions (JR, JAR)
-    jr3 = 8'b01000101, 
-    jal3 = 8'b01000110, 
-    jal4 = 8'b01000111,
+	//MUL Instruction
+    mul3 = 8'b00101100, 
+    mul4 = 8'b00101101, 
+    mul5 = 8'b00101110, 
 
-	 //Move From HI/LO
-    mfhi3 = 8'b01001000, 
-    mflo3 = 8'b01001001,
+	//NEG Instruction
+    neg3 = 8'b00101111, 
+    neg4 = 8'b00110000, 
+    neg5 = 8'b00110001,
 
-	 //Input and Output Instructions
-    in3 = 8'b01001010, 
-    out3 = 8'b01001011,
+	//NOT Instruction
+    not3 = 8'b00110010, 
+    not4 = 8'b00110011, 
+    not5 = 8'b00110100,
 
-	 //special Instructions
-    nop3 = 8'b01001100, 
-    halt3 = 8'b01001101;
+    //Branch Instructions
+    br3 = 8'b00110101, 
+    br4 = 8'b00110110, 
+    br5 = 8'b00110111, 
+    br6 = 8'b00111000, 
+    br7 = 8'b00111001,  
+
+    //Jump Instructions (JR, JAR)
+    jr3 = 8'b00111010, 
+    jal3 = 8'b00111011, 
+    jal4 = 8'b00111100,
+
+	//Load (LD) Instruction
+    ld3 = 8'b00111101, 
+    ld4 = 8'b00111110, 
+    ld5 = 8'b00111111, 
+    ld6 = 8'b01000000, 
+    ld7 = 8'b01000001,
+
+	//Load Immediate (LDI)
+    ldi3 = 8'b01000010, 
+    ldi4 = 8'b01000011, 
+    ldi5 = 8'b01000100,
+    ldi6 = 8'b01000101, 
+    ldi7 = 8'b01000110,
+
+	//Store (ST) Instruction
+    st3 = 8'b01000111, 
+    st4 = 8'b01001000, 
+    st5 = 8'b01001001, 
+    st6 = 8'b01001010, 
+    st7 = 8'b01001011,
+
+	//Move From HI/LO
+    mfhi3 = 8'b01001100, 
+    mflo3 = 8'b01001101,
+
+	//Input and Output Instructions
+    in3 = 8'b01001110, 
+    out3 = 8'b01001111,
+
+    // Special Instructions
+    nop3  = 8'b01010000, 
+    halt3 = 8'b01010001 
 
 	// Register to store current state
-	reg [3:0] present_state = reset_state;  
+	reg [8:0] present_state = reset_state;  
 
 	// FSM - State Transition Logic
 	always @(posedge Clock or posedge Reset)  
@@ -182,51 +189,48 @@ module ControlUnit (
 			  
 			  case (present_state)
 					reset_state	: present_state <= fetch0;
-					fetch0		: present_state <= fetch1;
-					fetch1		: present_state <= fetch2;
-					fetch2		: begin
+					fetch0 : present_state <= fetch1;
+					fetch1 : present_state <= fetch2;
+					fetch2 : begin
 					
 							 case (IR[31:27])
 								  // ALU and Operation Instructions
-								  5'b00011: present_state <= add3;     // ADD
-								  5'b00100: present_state <= sub3;     // SUB
-								  5'b00101: present_state <= and3;     // AND
-								  5'b00110: present_state <= or3;      // OR
-								  5'b00111: present_state <= ror3;     // ROR
-								  5'b01000: present_state <= rol3;     // ROL
-								  5'b01001: present_state <= shr3;     // SHR
-								  5'b01010: present_state <= shra3;    // SHRA
-								  
-								  5'b01011: present_state <= shl3;     // SHL
-								  5'b01100: present_state <= addi3;    // ADDI
-								  5'b01101: present_state <= andi3;    // ANDI
-								  5'b01110: present_state <= ori3;     // ORI
-								  5'b01111: present_state <= div3;     // DIV
-								  5'b10000: present_state <= mul3;     // MUL
-								  5'b10001: present_state <= neg3;     // NEG
-								  5'b10010: present_state <= not3;     // NOT
+								  5'b00011: present_state <= add3; //ADD
+								  5'b00100: present_state <= sub3; //SUB
+								  5'b00101: present_state <= and3; //AND
+								  5'b00110: present_state <= or3;  //OR
+								  5'b00111: present_state <= ror3; //ROR
+								  5'b01000: present_state <= rol3; //ROL
+								  5'b01001: present_state <= shr3; //SHR
+								  5'b01010: present_state <= shra3; //SHRA
+								  5'b01011: present_state <= shl3; //SHL
+
+								  5'b01100: present_state <= addi3; //ADDI
+								  5'b01101: present_state <= andi3; //ANDI
+								  5'b01110: present_state <= ori3; //ORI
+
+								  5'b01111: present_state <= div3; //DIV
+								  5'b10000: present_state <= mul3; //MUL
+								  5'b10001: present_state <= neg3; //NEG
+								  5'b10010: present_state <= not3; //NOT
 
 								  // Branch and Jump Instructions
-								  5'b10011: present_state <= br3;      // BRZR / BRNZ / BRMI / BRPL (use sub-opcode bits later)
-								  5'b10100: present_state <= jal3;     // JAR
-								  5'b10101: present_state <= jr3;      // JR
+								  5'b10011: present_state <= br3; //Branch
+								  5'b10100: present_state <= jal3; //JAR
+								  5'b10101: present_state <= jr3; //JR
 
 								  // I/O Instructions
-								  5'b10110: present_state <= in3;      // IN
-								  5'b10111: present_state <= out3;     // OUT
+								  5'b10110: present_state <= in3; //IN
+								  5'b10111: present_state <= out3; //OUT
 
 								  // Move from HI/LO
-								  5'b11000: present_state <= mflo3;    // MFLO
-								  5'b11001: present_state <= mfhi3;    // MFHI
-
-								  // Special Instructions
-								  5'b11010: present_state <= nop3;     // NOP
-								  5'b11011: present_state <= halt3;    // HALT
+								  5'b11000: present_state <= mflo3; //MFLO
+								  5'b11001: present_state <= mfhi3; //MFHI
 
 								  // Load/Store Instructions
-								  5'b00000: present_state <= ld3;      // LD
-								  5'b00001: present_state <= ldi3;     // LDI
-								  5'b00010: present_state <= st3;      // ST
+								  5'b00000: present_state <= ld3; //LD
+								  5'b00001: present_state <= ldi3; //LDI
+								  5'b00010: present_state <= st3; //ST
 
 								  default: present_state <= reset_state;
 							 endcase
@@ -241,79 +245,43 @@ module ControlUnit (
 					sub3: present_state <= sub4;
 					sub4: present_state <= sub5;
 					sub5: present_state <= reset_state;
-					
-					//mul instruction
-					mul3: present_state <= mul4;
-					mul4: present_state <= mul5;
-					mul5: present_state <= mul6;
-					mul6: present_state <= reset_state;
-					
-					//div instruction
-					div3: present_state <= div4;
-					div4: present_state <= div5;
-					div5: present_state <= div6;
-					div6: present_state <= reset_state;
-					
-					//or instruction
-					or3: present_state <= or4;
-					or4: present_state <= or5;
-					or5: present_state <= reset_state;
-					
-					//and instruction
+
+                    //and instruction
 					and3: present_state <= and4;
 					and4: present_state <= and5;
 					and5: present_state <= reset_state;
+
+                    //or instruction
+					or3: present_state <= or4;
+					or4: present_state <= or5;
+					or5: present_state <= reset_state;
+
+                    //ror instruction
+					ror3: present_state <= ror4;
+					ror4: present_state <= ror5;
+					ror5: present_state <= reset_state;
+
+                    //rol instruction
+					rol3: present_state <= rol4;
+					rol4: present_state <= rol5;
+					rol5: present_state <= reset_state;
+
+                    //shr instruction
+					shr3: present_state <= shr4;
+					shr4: present_state <= shr5;
+					shr5: present_state <= reset_state;
+
+                    //shra instruction
+                    shra3: present_state <= shra3;
+                    shra4: present_state <= shra4;
+                    shra5: present_state <= reset_state;
 					
 					//shl instruction
 					shl3: present_state <= shl4;
 					shl4: present_state <= shl5;
 					shl5: present_state <= reset_state;
-					
-					//shr instruction
-					shr3: present_state <= shr4;
-					shr4: present_state <= shr5;
-					shr5: present_state <= reset_state;
-					
-					//rol instruction
-					rol3: present_state <= rol4;
-					rol4: present_state <= rol5;
-					rol5: present_state <= reset_state;
-					
-					//ror instruction
-					ror3: present_state <= ror4;
-					ror4: present_state <= ror5;
-					ror5: present_state <= reset_state;
-					
-					//neg instruction
-					neg3: present_state <= neg4;
-					neg4: present_state <= neg5;
-					neg5: present_state <= reset_state;
-					
-					//not instruction
-					not3: present_state <= not4;
-					not4: present_state <= not5;
-					not5: present_state <= reset_state;
-					
-					//ld instruction
-					ld3: present_state <= ld4;
-					ld4: present_state <= ld5;
-					ld5: present_state <= ld6;
-					ld6: present_state <= ld7;
-					ld7: present_state <= reset_state;
-					
-					//ldi instruction
-					ldi3: present_state <= ldi4;
-					ldi4: present_state <= ldi5;
-					ldi5: present_state <= reset_state;
-					
-					//st instruction
-					st3: present_state <= st4;
-					st4: present_state <= st5;
-					st5: present_state <= st6;
-					st6: present_state <= st7;
-					st7: present_state <= reset_state;
-					
-					//addi instruction
+
+                    //addi instruction
 					addi3: present_state <= addi4;
 					addi4: present_state <= addi5;
 					addi5: present_state <= reset_state;
@@ -327,9 +295,29 @@ module ControlUnit (
 					ori3: present_state <= ori4;
 					ori4: present_state <= ori5;
 					ori5: present_state <= reset_state;
+
+                    //div instruction
+					div3: present_state <= div4;
+					div4: present_state <= div5;
+					div5: present_state <= div6;
+					div6: present_state <= reset_state;
 					
+					//mul instruction
+					mul3: present_state <= mul4;
+					mul4: present_state <= mul5;
+					mul5: present_state <= reset_state;
+								
+					//neg instruction
+					neg3: present_state <= neg4;
+					neg4: present_state <= neg5;
+					neg5: present_state <= reset_state;
 					
-					//branching instructions
+					//not instruction
+					not3: present_state <= not4;
+					not4: present_state <= not5;
+					not5: present_state <= reset_state;
+
+                    //branching instructions
 					br3: present_state <= br4;
 					br4: present_state <= br5;
 					br5: present_state <= br6;
@@ -337,12 +325,33 @@ module ControlUnit (
 					br7: present_state <= reset_state;
 
 					// JR Instruction
-					jr3: present_state <= reset_state;
+                    jr3: present_state <= reset_state;
 
-					// JAL Instruction
-					jal3: present_state <= jal4;
-					jal4: present_state <= reset_state;
-
+                    // JAL Instruction
+                    jal3: present_state <= jal4;
+                    jal4: present_state <= reset_state;
+					
+					//ld instruction
+					ld3: present_state <= ld4;
+					ld4: present_state <= ld5;
+					ld5: present_state <= ld6;
+					ld6: present_state <= ld7;
+					ld7: present_state <= reset_state;
+					
+					//ldi instruction
+					ldi3: present_state <= ldi4;
+					ldi4: present_state <= ldi5;
+                    ldi5: present_state <= ldi6;
+                    ldi6: present_state <= ldi7;
+					ldi7: present_state <= reset_state;
+					
+					//st instruction
+					st3: present_state <= st4;
+					st4: present_state <= st5;
+					st5: present_state <= st6;
+					st6: present_state <= st7;
+					st7: present_state <= reset_state;
+					
 					// MFHI / MFLO
 					mfhi3: present_state <= reset_state;
 					mflo3: present_state <= reset_state;
@@ -355,7 +364,7 @@ module ControlUnit (
 					nop3: present_state <= reset_state;
 
 					// HALT
-					halt3: present_state <= halt3; // Loop forever in HALT
+					halt3: present_state <= halt3; //looping forever in HALT
 
 					default: present_state <= reset_state;
 			  endcase
@@ -435,7 +444,7 @@ module ControlUnit (
             end
 
             sub4: begin
-                Grc <= 1; //selecting register Rc 
+                Grc <= 1; //selecting the register Rc 
                 Rout <= 1; //outputting its value onto the bus
                 SUB <= 1; //calling the SUB operation in the ALU
                 Zin <= 1; //the ALU result is stored in the Z register
@@ -455,7 +464,7 @@ module ControlUnit (
 			end
 			
             and4: begin
-				Grc <= 1; //selecting register Rc
+				Grc <= 1; //selecting the register Rc
 				Rout <= 1; //outputting its value onto the bus
 				AND <= 1; //calling the AND operation in the ALU
 				Zin <= 1; //the ALU result is stored in the Z register
@@ -475,7 +484,7 @@ module ControlUnit (
             end
 
             or4: begin
-                Grc <= 1; //selecting register Rc
+                Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus
                 OR <= 1; //calling the OR operation in the ALU
                 Zin <= 1; //the ALU result is stored in the Z register
@@ -495,7 +504,7 @@ module ControlUnit (
             end
 
             ror4: begin
-                Grc <= 1; //selecting register Rc
+                Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus
                 ROR <= 1; //calling the ROR operation in the ALU
                 Zin <= 1; //the ALU result is stored in the Z register
@@ -515,7 +524,7 @@ module ControlUnit (
             end
 
             rol4: begin
-                Grc <= 1; //selecting register Rc
+                Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus
                 ROL <= 1; //calling the ROL operation in the ALU
                 Zin <= 1; //the ALU result is stored in the Z register
@@ -529,234 +538,245 @@ module ControlUnit (
 
             //Execution: SHR instruction
             shr3: begin
-                Grb <= 1;     // Select Rb (R3)
-                Rout <= 1;
-                Yin <= 1;     // Load R3 into Y register
+                Grb <= 1; //selecting the register Rb
+                Rout <= 1; //outputting its value onto the bus
+                Yin <= 1; //storing the bus value in the Y reg
             end
 
             shr4: begin
-                Grc <= 1;     // Select Rc (R1) — shift amount
-                Rout <= 1;
-                SHR <= 1;     // Trigger SHR in ALU
-                Zin <= 1;     // Store result in Z
+                Grc <= 1; //selecting the register Rc
+                Rout <= 1; //outputting its value onto the bus 
+                SHR <= 1; //calling the SHR operation in the ALU
+                Zin <= 1; //the ALU result is stored in the Z register
             end
 
             shr5: begin
-                Zlowout <= 1;  // Output lower half of Z
-                Gra <= 1;  // Select Ra (R3)
-                Rin <= 1;  // Store result into R3
+                Zlowout <= 1; //outputting the result
+                Gra <= 1; //selected the destination register (Ra)
+                Rin <= 1; //storing the value (ALU result) on the bus into Ra
             end
 
             //Execution: SHRA instruction
             shra3: begin
-                Grb <= 1;     // Select Rb (R4)
-                Rout <= 1;
-                Yin <= 1;     // Store value in Y
+                Grb <= 1; //selecting the register Rb
+                Rout <= 1; //outputting its value onto the bus
+                Yin <= 1; //storing the bus value in the Y reg
             end
 
             shra4: begin
-                Grc <= 1;     // Select Rc (R1)
-                Rout <= 1;
-                SHRA <= 1;     // Activate Arithmetic Shift Right
-                Zin <= 1;     // Store ALU output in Z
+                Grc <= 1; //selecting the register Rc
+                Rout <= 1; //outputting its value onto the bus
+                SHRA <= 1; //calling the SHR operation in the ALU
+                Zin <= 1; //the ALU result is stored in the Z register
             end
             
             shra5: begin
-                Zlowout <= 1;  // Output result from Zlow
-                Gra <= 1;  // Select Ra (R2)
-                Rin <= 1;  // Store into destination register
+                Zlowout <= 1; //outputting the result
+                Gra <= 1; //selected the destination register (Ra)
+                Rin <= 1; //storing the value (ALU result) on the bus into Ra
             end
 
             //Execution: SHL instruction
             shl3: begin
-                Grb <= 1;     // Select Rb (R3)
-                Rout <= 1;
-                Yin <= 1;     // Store into Y
+                Grb <= 1; //selecting the register Rb
+                Rout <= 1; //outputting its value onto the bus
+                Yin <= 1; //storing the bus value in the Y reg
             end
 
             shl4: begin
-                Grc <= 1;     // Select Rc (R1)
-                Rout <= 1;
-                SHL <= 1;     // Trigger shift-left logic in ALU
-                Zin <= 1;     // Store result in Z register
+                Grc <= 1; //selecting the register Rc
+                Rout <= 1; //outputting its value onto the bus
+                SHL <= 1; //calling the SHL operation in the ALU
+                Zin <= 1; //the ALU result is stored in the Z register
             end
 
             shl5: begin
-                Zlowout <= 1;  // Output Zlow to bus
-                Gra <= 1;  // Select Ra (R2)
-                Rin <= 1;  // Load result into destination
+                Zlowout <= 1; //outputting the result
+                Gra <= 1; //selected the destination register (Ra)
+                Rin <= 1; //storing the value (ALU result) on the bus into Ra
             end
 
             //Execution: ADDI instruction
             addi3: begin
-                Grb <= 1;     // Select R4
-                Rout <= 1;
-                Yin <= 1;     // Load R4 into Y register
+                Grb <= 1; //selecting the register Rb
+                Rout <= 1; //outputting its value onto the bus
+                Yin <= 1; //storing the bus value in the Y reg
             end
 
-            //Execution: ANDI instruction
             addi4: begin
-                Cout <= 1;     // Output constant C (from sign-extended immediate)
-                ADD <= 1;     // Trigger addition operation
-                Zin <= 1;     // Store result in Z
+                Cout <= 1; //outputting the constant 
+                ADD <= 1; //calling the ADD operation in the ALU
+                Zin <= 1; //the ALU result is stored in the Z register
             end
 
             addi5: begin
-                Zlowout <= 1;  // Output Zlow to the bus
-                Gra <= 1;  // Select Ra (R4)
-                Rin <= 1;  // Store result into R4
+                Zlowout <= 1; //outputting the result
+                Gra <= 1; //selected the destination register (Ra)
+                Rin <= 1; //storing the value (ALU result) on the bus into Ra
+            end
+
+            //Execution: ANDI instruction
+            andi3: begin
+                Grb <= 1; //selecting the register Rb
+                Rout <= 1; //outputting its value onto the bus
+                Yin <= 1; //storing the bus value in the Y reg
+            end
+
+            andi4: begin
+                Cout <= 1; //outputting the constant
+                AND <= 1; //calling the AND operation in the ALU
+                Zin <= 1; //the ALU result is stored in the Z register
+            end
+
+            andi5: begin
+                Zlowout <= 1; //outputting the result
+                Gra <= 1; //selected the destination register (Ra)
+                Rin <= 1; //storing the value (ALU result) on the bus into Ra
             end
 
             //Execution: ORI instruction
             ori3: begin
-                Grb <= 1;     // Select R2
-                Rout <= 1;
-                Yin <= 1;     // Store R2 into Y
+                Grb <= 1; //selecting the register Rb
+                Rout <= 1; //outputting its value onto the bus
+                Yin <= 1; //storing the bus value in the Y reg
             end
 
             ori4: begin
-                Cout <= 1;     // Output sign-extended constant
-                OR <= 1;     // Trigger bitwise OR in ALU
-                Zin <= 1;     // Store result in Z register
+                Cout <= 1; //outputting the constant
+                OR <= 1; //calling the OR operation in the ALU
+                Zin <= 1; //the ALU result is stored in the Z register
             end
 
             ori5: begin
-                Zlowout <= 1;  // Output result from Zlow
-                Gra <= 1;  // Select Ra (R4)
-                Rin <= 1;  // Load result into R4
+                Zlowout <= 1; //outputting the result
+                Gra <= 1; //selected the destination register (Ra)
+                Rin <= 1; //storing the value (ALU result) on the bus into Ra
             end
 
             //Execution: DIV instruction
             div3: begin
-                Grb <= 1;    // Rb = dividend (R6)
-                Rout <= 1;    
-                Yin <= 1;    // Store into Y
+                Grb <= 1; //selecting the register Rb
+                Rout <= 1; //outputting its value onto the bus   
+                Yin <= 1; //storing the bus value in the Y reg
             end
 
             div4: begin
-                Grc <= 1;    // Rc = divisor (R5)
-                Rout <= 1;
-                DIV <= 1;    // Trigger division
-                Zin <= 1;    // Store result in Z (Z = {rem, quot})
+                Grc <= 1; //selecting the register Rc
+                Rout <= 1; //outputting its value onto the bus
+                DIV <= 1; //calling the DIV operation in the ALU
+                ZHighIn <= 1;
+                ZLowIn <= 1;
             end
 
             div5: begin
-                Zhighout <= 1; // Z[63:32] = remainder
-                HIin <= 1; // Store in HI
+                Zhighout <= 1; //the division remainder is being output onto the bus 
+                HIin <= 1; //storing this value into the HI reg
             end
 
             div6: begin
-                Zlowout <= 1;  // Z[31:0] = quotient
-                LOin <= 1;  // Store in LO
+                Zlowout <= 1; //the division quotient is being output onto the bus
+                LOin <= 1; //storing this value into the LO reg
             end
 
             //Execution: MUL instruction
             mul3: begin
-                Grb <= 1; //selecting the register source Rb
+                Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
-                Yin <= 1;  //storing the bus's value into Y
+                Yin <= 1; //storing the bus value in the Y reg
             end
 
             mul4: begin
-                Grc <= 1;  // You may still need to select Rc, even if it's zero
-                Rout <= 1;     // Output Rc (value = 0)
-                MUL <= 1;     // Trigger ALU multiplication
-                ZLowIn <= 1;   // Store result into Zlow
-                ZHighIn <= 1;   // You must still capture Zhigh (to clear it), but won't use it
+                Grc <= 1; //selecting the register Rc
+                Rout <= 1; //outputting its value onto the bus
+                MUL <= 1; //calling the MUL operation in the ALU
+                ZLowIn <= 1; 
+                ZHighIn <= 1;
             end
 
             mul5: begin
-                Zlowout <= 1;   // Output result from Zlow
-                Gra <= 1;   // Select destination register Ra
-                Rin <= 1;   // Load result into Ra
+                Zlowout <= 1; //outputting the result from Zlow
+                Gra <= 1; //select destination register Ra
+                Rin <= 1; //loading the result into Ra
             end
 
             //Execution: NEG instruction
             neg3: begin
-                Grb <= 1;     // Select source register R4
-                Rout <= 1;
-                Yin <= 1;     // Load into Y register
+                Grb <= 1; //selecting the register Rb
+                Rout <= 1; //outputting its value onto the bus
+                Yin <= 1; //storing the bus value in the Y reg
             end
 
             neg4: begin
-                NEG <= 1;     // Trigger NEG operation in ALU
-                Zin <= 1;     // Store result in Z
+                NEG <= 1; //calling the NEG operation in the ALU
+                Zin <= 1; //the ALU result is stored in the Z register
             end
 
             neg5: begin
-                Zlowout <= 1;  // Output result from Zlow
-                Gra <= 1;  // Select destination register (R4)
-                Rin <= 1;  // Store result into R4
+                Zlowout <= 1; //outputting the result from Zlow
+                Gra <= 1; //select the destination register Ra
+                Rin <= 1; //loading the result into Ra
             end
 
             //Execution: NOT instruction
             not3: begin
-                Grb <= 1; //selecting the source register
-                Rout <= 1; //placing that its value on the bus
-                Yin <= 1; //storing the value at that register into the Y register
+                Grb <= 1; //selecting the register Rb
+                Rout <= 1; //outputting its value onto the bus
+                Yin <= 1; //storing the bus value in the Y reg
             end
 
             not4: begin
-                NOT <= 1; //enabling the NOT operation in ALU
-                Zin <= 1; //storing the result into Z
+                NOT <= 1; //calling the NOT operation in the ALU
+                Zin <= 1; //the ALU result is stored in the Z register
             end
 
             not5: begin
-                Zlowout <= 1;  //outputting the value from Zlow register
-                Gra <= 1;  //selecting the Ra
-                Rin <= 1;  //loading the result into the selected register
+                Zlowout <= 1; //outputting the result from Zlow
+                Gra <= 1; //select the destination register Ra
+                Rin <= 1; //loading the result into Ra
             end
 
             //The following instructions aren't needed: BRZR, BRNZ, Input/Output 
 
-            //Execution: BRMI instruction
+            //Execution: Branch instruction (brpl and brmi)
             br3: begin
-                Gra <= 1;    // Select Ra (R3)
-                Rout <= 1;    // Output R3 to bus
-                CONin <= 1;    // Trigger CON_FF evaluation
+                Gra <= 1; //selecting the register Ra
+                Rout <= 1; //outputting the value onto the bus
+                CONin <= 1; //triggering the CON_FF evaluation
             end
 
             br4: begin
-                // No control signals; transition state only
+                Gra <= 0; 
+                Rout <= 0;
+                CONin <= 0;
+                PCout <= 1; //outputing the PC value onto the bus
+                Yin <= 1; //taking the value from the bus into Y
             end
 
             br5: begin
-                PCin <= 1;    // Enable PC update
-                Cout <= 1;    // Output constant offset
+                PCout <= 0; 
+                Yin <= 0;
+                Cout <= 1; //outputing the constant value onto the bus
+                ADD <= 1; //calling the ADD operation in the ALU
+                Zin <= 1; //the ALU result is stored in the Z register
             end
 
             br6: begin
-                // Can be a pause state to allow PC update
+                Cout <= 0;
+                ADD  <= 0;
+                Zin  <= 0;
+                if (CON)
+                    Zlowout <= 1; //branch taken
+                else
+                    IncPC <= 1; //branch not taken
             end
 
             br7: begin
-                // Transition to fetch0 handled in FSM transition logic
+                Zlowout <= 0;
+                IncPC   <= 0;
+                if (CON)
+                    PCin <= 1;
             end
             
-            //Execution: BRPL instruction
-            br3: begin
-                Gra <= 1; // Select R4 (Ra)
-                Rout <= 1; // Output R4 onto bus
-                CONin <= 1; // Trigger evaluation in CON_FF
-            end
-
-            br4: begin
-                // No control signals needed
-            end
-
-            br5: begin
-                Cout <= 1;     // Output sign-extended constant
-                PCin <= 1;     // Update Program Counter
-            end
-
-            br6: begin
-                // Idle state for safe update
-            end
-
-            br7: begin
-                // Transition to fetch0 handled in FSM controller
-            end
-
             //Execution: JR instruction
             jr3: begin
                 Gra <= 1; //selecting the source register
@@ -767,7 +787,8 @@ module ControlUnit (
             //Execution: JAL instruction
             jal3: begin
                 PCout <= 1; //outputting the current PC 
-                R8in <= 1; //saving this return address at R8
+                Grb <= 1; //selecting Rb for the return address
+                Rin <= 1; //saving this return address at R8
             end
 
             jal4: begin
@@ -843,7 +864,7 @@ module ControlUnit (
             end
 
             ldi7: begin
-                MDRout <= 1;  //outputting the value of MDR
+                MDRout <= 1; //outputting the value of MDR
                 Gra <= 1; //selecting the destination register
                 Rin <= 1; //storeing the value on the bus into the destination reg
             end
