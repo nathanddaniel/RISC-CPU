@@ -1,4 +1,7 @@
-
+//NOT TESTED
+/* TO DO:
+	Fix T6 so that signals are actually driven for Read and MDRin
+*/
 `timescale 1ns/1ps
 
 module datapathTB_LD;
@@ -90,6 +93,11 @@ module datapathTB_LD;
    initial begin
       clock = 0;
 		clear = 0;
+		// Case 1 
+		//uut.PC_inst.newPC = 32'h00;
+		// Case 2 
+		uut.PC_inst.newPC = 32'h02;
+		//uut.r2.BusMuxIn = 32'h78;
    end
 	 
 	always 
@@ -138,28 +146,30 @@ module datapathTB_LD;
             end
 
 			  T3: begin 
-			  			  MDRout <= 0;     	IRin <= 0;
-                    Grb <= 1;          BAout <= 1;      			Yin <= 1;						
+			  			  MDRout <= 0;     		 IRin <= 0;
+                    Grb <= 1;           BAout <= 1;      	Yin <= 1;						
             end
 
 			  T4: begin 
-			          Grb <= 0;         	BAout <= 0;       		Yin <= 0;
+			          Grb <= 0;         		 BAout <= 0;       	Yin <= 0;
                    Cout <= 1;          opcode <= 5'b00011;   	ZLowIn <= 1;
             end
 
 			  T5: begin 
-			  		 Cout <= 0;          ZLowIn <= 0;
-                Zlowout <= 1;       MARin <= 1; 
+			  			 Cout <= 0;          ZLowIn <= 0;
+                   Zlowout <= 1;       MARin <= 1; 
             end
 
 			  T6: begin
-					 Zlowout <= 0;       MARin <= 0;
-                Read <= 1;          MDRin <= 1;		 
+			  			 Zlowout <= 0;       MARin <= 0;
+						 Read <= 1;				MDRin <= 1;
+                   	 
             end
 
 			  T7: begin 
-					 Read <= 0;        	   MDRin <= 0;
-                Gra <= 1;              MDRout <= 1;     	Rin <= 1;
+				    Read <= 0;				MDRin <= 0;
+					 MDRout <= 1;        Gra <= 1;		Rin <= 1;	
+                
             end
 		endcase
 	end

@@ -764,7 +764,7 @@ module ControlUnit (
                 Cout <= 0;
                 ADD  <= 0;
                 Zin  <= 0;
-                if (CON)
+                if (CON_FF)
                     Zlowout <= 1; //branch taken
                 else
                     IncPC <= 1; //branch not taken
@@ -773,7 +773,7 @@ module ControlUnit (
             br7: begin
                 Zlowout <= 0;
                 IncPC   <= 0;
-                if (CON)
+                if (CON_FF)
                     PCin <= 1;
             end
             
