@@ -1,7 +1,10 @@
-
+//NOT TESTED
+/* TO DO:
+	Fix T6 so that signals are actually driven for Read and MDRin
+*/
 `timescale 1ns/1ps
 
-module datapathTB_LDI;
+module datapathTB_ST;
 
     // Clock and Reset
     reg clock;
@@ -26,10 +29,11 @@ module datapathTB_LDI;
 	 wire CON_out;
 	 wire [31:0] external_output;
 	 
-	 parameter Default = 4'b0000, T0 = 4'b0001, T1 = 4'b0010, T2 = 4'b0011, T3 = 4'b0100, T4 = 4'b0101, T5 = 4'b0110;
+	 parameter Default = 4'b0000, T0 = 4'b0111, T1 = 4'b1000, T2 = 4'b1001, T3 = 4'b1010, T4 = 4'b1011, T5 = 4'b1100, T6 = 4'b1101, T7 = 4'b1110;
     
 	 reg [3:0] Present_state = Default;
 	 
+
     // Instantiate DataPath
     DataPath uut (
         .clock(clock),
@@ -90,11 +94,12 @@ module datapathTB_LDI;
    initial begin
       clock = 0;
 		clear = 0;
-		//case 1 
-	   uut.PC_inst.newPC = 32'h02;
-		//case2
-		//uut.PC_inst.newPC = 32'h03;
-		//uut.r2.BusMuxIn = 32'h78;
+		//Case 1
+	   //uut.PC_inst.newPC = 32'h04;
+		
+		//Case 2
+		uut.r3.BusMuxIn = 32'hB6;
+		uut.PC_inst.newPC = 32'h05;
    end
 	 
 	always 
@@ -108,7 +113,9 @@ module datapathTB_LDI;
         T2:      Present_state <= T3;
         T3:      Present_state <= T4;
         T4:      Present_state <= T5;
-        T5:      Present_state <= Default; // Reset or stop
+        T5:      Present_state <= T6;
+        T6:      Present_state <= T7;
+        T7:      Present_state <= Default; // Reset or stop
 		endcase
 	end 
 	
@@ -136,25 +143,34 @@ module datapathTB_LDI;
             end
 
 			T2: begin 
-						Zlowout <= 0;		 PCin <= 0; 				Read <= 0; MDRin <= 0;
-                  MDRout <= 1;       IRin <= 1; 
+						  Zlowout <= 0; PCin <= 0; Read <= 0; MDRin <= 0;
+                    MDRout <= 1;    IRin <= 1; 
             end
 
 			  T3: begin 
-			  		  MDRout <= 0;     	 IRin <= 0;
-                 Grb <= 1;           BAout <= 1;      	   Yin <= 1;						
+			  			  MDRout <= 0;     		 IRin <= 0;
+                    Gra <= 1;           BAout <= 1;      	Yin <= 1;						
             end
 
 			  T4: begin 
-			        Grb <= 0;         	 BAout <= 0;       		Yin <= 0;
-                 Cout <= 1;          opcode <= 5'b00011;   	ZLowIn <= 1;
+			          Gra <= 0;         		 BAout <= 0;       	Yin <= 0;
+                   Cout <= 1;          opcode <= 5'b00011;   	ZLowIn <= 1;
             end
 
 			  T5: begin 
-			  		 Cout <= 0;           ZLowIn <= 0;
-                Zlowout <= 1;        Gra <= 1;		Rin <= 1; 
+			  			 Cout <= 0;       		 ZLowIn <= 0;
+                   Zlowout <= 1;       MARin <= 1; 
             end
 
+			  T6: begin
+			  			 Zlowout <= 0;       MARin <= 0;
+						 Grb <= 1;          	Rout <= 1;	Write <= 1; 
+            end
+
+			  T7: begin 
+					 Grb <= 0;            Rout <= 0;	 Write <= 0;
+                         	
+            end
 		endcase
 	end
 
