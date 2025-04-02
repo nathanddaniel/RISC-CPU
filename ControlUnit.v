@@ -1,12 +1,14 @@
+
 `timescale 1ns/10ps
 
 module ControlUnit (
     input [31:0] IR,              							
-    input Clock, Reset, Stop, CON_FF, Interrupts,
+    input Clock, Reset, 
+	input Run, Stop, CON_FF, Interrupts,
 
     //control Signals to/from Datapath
     output reg Gra, Grb, Grc, Rin, Rout,
-    output reg Run, Clear,
+    output reg Clear,
     output reg InPortout,         
     output reg Read, Write,
 
@@ -39,7 +41,8 @@ module ControlUnit (
     //output control signals
     output reg PCout, MDRout,
     output reg Zhighout, Zlowout,
-    output reg HIout, LOout
+    output reg HIout, LOout,
+	 output reg IncPC
 );
 
 	//defining state parameters for FSM
@@ -175,7 +178,7 @@ module ControlUnit (
 
     // Special Instructions
     nop3  = 8'b01010000, 
-    halt3 = 8'b01010001 
+    halt3 = 8'b01010001; 
 
 	// Register to store current state
 	reg [8:0] present_state = reset_state;  
@@ -379,7 +382,7 @@ module ControlUnit (
 		 MDRin <= 0; 		MDRout <= 0;	 PCin <= 0; 		PCout <= 0; 		IRin <= 0; 
 		 IncPC <= 0;		Yin <= 0; 		 Zin <= 0; 			Zhighout <= 0; 	Zlowout <= 0;
 		 HIin <= 0; 		LOin <= 0; 		 HIout <= 0; 		LOout <= 0;			CONin <= 0; 
-		 Run <= 0; 			Clear <= 0;		 ADD <= 0; 			SUB <= 0; 			AND <= 0; 
+		 Clear <= 0;		ADD <= 0; 		 SUB <= 0; 			AND <= 0; 
 		 OR <= 0;			SHR <= 0; 		 SHRA <= 0; 		SHL <= 0; 			ROL <= 0; 
 		 ROR <= 0;			ADDI <= 0; 		 ANDI <= 0; 		ORI <= 0;			DIV <= 0; 
 		 MUL <= 0; 			NEG <= 0; 		 NOT <= 0;			BRZR <= 0; 			BRNZ <= 0; 
@@ -395,8 +398,7 @@ module ControlUnit (
 				Yin <= 0;	Zin <= 0;
 					
 				PCin <= 1; //setting PC to 0
-				Clear <= 1; //clearing internal register states, if needed
-				Run <= 1; //enabling operation		  
+				Clear <= 1; //clearing internal register states, if needed	  
 			end
 
 			// Fetch cycle
@@ -407,23 +409,37 @@ module ControlUnit (
 			end
 			  
 			fetch1: begin
+				PCout <= 0;
+				MARin <= 0;
+				IncPC <= 0;
+				
 				Read <= 1; //reading from memory at the MAR address
 				MDRin <= 1; //storing the fetched data into MDR
 			end
 
 			fetch2: begin
+				Read <= 0;
+				MDRin <= 0;
+			
 				MDRout <= 1; //put the value (the instruction) in MDR onto the bus
 				IRin <= 1; //load instruction into the IR
 			end
 
             //Executing the ADD instruction
 			add3: begin
+				MDRout <= 0;
+				IRin <= 0;
+			
 				Grb <= 1; //selecting the register Rb
 				Rout <= 1; //outputting its value onto the bus
 				Yin <= 1; //storing the bus value in the Y reg
 			end
 			
             add4: begin
+				Grb <= 0;
+				Rout <= 0;
+				Yin <= 0;
+				
 				Grc <= 1; //selecting register Rc 
 				Rout <= 1; //outputting its value onto the bus
 				ADD <= 1; //calling the ADD operation in the ALU
@@ -431,6 +447,11 @@ module ControlUnit (
 			end
 
             add5: begin
+				Grc <= 0;
+				Rout <= 0;
+				ADD <= 0;
+				Zin <= 0;
+			
                 Zlowout <= 1; //outputting the result 
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -438,12 +459,19 @@ module ControlUnit (
 
             // Execution: SUB instruction
             sub3: begin
+			    MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             sub4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Grc <= 1; //selecting the register Rc 
                 Rout <= 1; //outputting its value onto the bus
                 SUB <= 1; //calling the SUB operation in the ALU
@@ -451,6 +479,11 @@ module ControlUnit (
             end
 
             sub5: begin
+                Grc <= 0;
+                Rout <= 0;
+                SUB <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -458,12 +491,19 @@ module ControlUnit (
             
 			// Execution: AND instruction
 			and3: begin
+				MDRout <= 0;
+				IRin <= 0;
+			
 				Grb <= 1; //selecting the register Rb
 				Rout <= 1; //outputting its value onto the bus
 				Yin <= 1;  //storing the bus value in the Y reg
 			end
 			
             and4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
 				Grc <= 1; //selecting the register Rc
 				Rout <= 1; //outputting its value onto the bus
 				AND <= 1; //calling the AND operation in the ALU
@@ -471,6 +511,11 @@ module ControlUnit (
 			end
 
             and5: begin
+                Grc <= 0;
+                Rout <= 0;
+                AND <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -478,12 +523,19 @@ module ControlUnit (
 
             //Executing the OR instruction
             or3: begin
+			    MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus    
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             or4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus
                 OR <= 1; //calling the OR operation in the ALU
@@ -491,6 +543,11 @@ module ControlUnit (
             end
 
             or5: begin
+                Grc <= 0;
+                Rout <= 0;
+                OR <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -498,12 +555,19 @@ module ControlUnit (
 
             //Execution: ROR instruction
             ror3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus  
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             ror4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus
                 ROR <= 1; //calling the ROR operation in the ALU
@@ -511,6 +575,11 @@ module ControlUnit (
             end
 
             ror5: begin
+                Grc <= 0;
+                Rout <= 0;
+                ROR <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -518,12 +587,19 @@ module ControlUnit (
 
             //Execution: ROL instruction 
             rol3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus   
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             rol4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus
                 ROL <= 1; //calling the ROL operation in the ALU
@@ -531,6 +607,11 @@ module ControlUnit (
             end
 
             rol5: begin
+                Grc <= 0;
+                Rout <= 0;
+                ROL <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -538,12 +619,19 @@ module ControlUnit (
 
             //Execution: SHR instruction
             shr3: begin
+			    MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             shr4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus 
                 SHR <= 1; //calling the SHR operation in the ALU
@@ -551,6 +639,11 @@ module ControlUnit (
             end
 
             shr5: begin
+                Grc <= 0;
+                Rout <= 0;
+                SHR <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -558,12 +651,19 @@ module ControlUnit (
 
             //Execution: SHRA instruction
             shra3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             shra4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus
                 SHRA <= 1; //calling the SHR operation in the ALU
@@ -571,6 +671,11 @@ module ControlUnit (
             end
             
             shra5: begin
+                Grc <= 0;
+                Rout <= 0;
+                SHRA <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -578,12 +683,19 @@ module ControlUnit (
 
             //Execution: SHL instruction
             shl3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             shl4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus
                 SHL <= 1; //calling the SHL operation in the ALU
@@ -591,6 +703,11 @@ module ControlUnit (
             end
 
             shl5: begin
+                Grc <= 0;
+                Rout <= 0;
+                SHL <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -598,18 +715,29 @@ module ControlUnit (
 
             //Execution: ADDI instruction
             addi3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             addi4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Cout <= 1; //outputting the constant 
                 ADD <= 1; //calling the ADD operation in the ALU
                 Zin <= 1; //the ALU result is stored in the Z register
             end
 
             addi5: begin
+                Cout <= 0;
+                ADD <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -617,18 +745,29 @@ module ControlUnit (
 
             //Execution: ANDI instruction
             andi3: begin
+		  		MDRout <= 0;
+			    IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             andi4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Cout <= 1; //outputting the constant
                 AND <= 1; //calling the AND operation in the ALU
                 Zin <= 1; //the ALU result is stored in the Z register
             end
 
             andi5: begin
+                Cout <= 0;
+                AND <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -636,18 +775,29 @@ module ControlUnit (
 
             //Execution: ORI instruction
             ori3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             ori4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Cout <= 1; //outputting the constant
                 OR <= 1; //calling the OR operation in the ALU
                 Zin <= 1; //the ALU result is stored in the Z register
             end
 
             ori5: begin
+                Cout <= 0;
+                OR <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result
                 Gra <= 1; //selected the destination register (Ra)
                 Rin <= 1; //storing the value (ALU result) on the bus into Ra
@@ -655,12 +805,19 @@ module ControlUnit (
 
             //Execution: DIV instruction
             div3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus   
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             div4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus
                 DIV <= 1; //calling the DIV operation in the ALU
@@ -669,23 +826,39 @@ module ControlUnit (
             end
 
             div5: begin
+                Grc <= 0;
+                Rout <= 0;
+                DIV <= 0;
+                ZHighIn <= 0;
+                ZLowIn <= 0;
+                
                 Zhighout <= 1; //the division remainder is being output onto the bus 
                 HIin <= 1; //storing this value into the HI reg
             end
 
             div6: begin
+                Zhighout <= 0;
+                HIin <= 0;
+
                 Zlowout <= 1; //the division quotient is being output onto the bus
                 LOin <= 1; //storing this value into the LO reg
             end
 
             //Execution: MUL instruction
             mul3: begin
+			    MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             mul4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Grc <= 1; //selecting the register Rc
                 Rout <= 1; //outputting its value onto the bus
                 MUL <= 1; //calling the MUL operation in the ALU
@@ -694,6 +867,12 @@ module ControlUnit (
             end
 
             mul5: begin
+                Grc <= 0;
+                Rout <= 0;
+                MUL <= 0;
+                ZLowIn <= 0;
+                ZHighIn <= 0;
+
                 Zlowout <= 1; //outputting the result from Zlow
                 Gra <= 1; //select destination register Ra
                 Rin <= 1; //loading the result into Ra
@@ -701,17 +880,27 @@ module ControlUnit (
 
             //Execution: NEG instruction
             neg3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             neg4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 NEG <= 1; //calling the NEG operation in the ALU
                 Zin <= 1; //the ALU result is stored in the Z register
             end
 
             neg5: begin
+                NEG <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result from Zlow
                 Gra <= 1; //select the destination register Ra
                 Rin <= 1; //loading the result into Ra
@@ -719,17 +908,27 @@ module ControlUnit (
 
             //Execution: NOT instruction
             not3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the register Rb
                 Rout <= 1; //outputting its value onto the bus
                 Yin <= 1; //storing the bus value in the Y reg
             end
 
             not4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 NOT <= 1; //calling the NOT operation in the ALU
                 Zin <= 1; //the ALU result is stored in the Z register
             end
 
             not5: begin
+                NOT <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the result from Zlow
                 Gra <= 1; //select the destination register Ra
                 Rin <= 1; //loading the result into Ra
@@ -739,6 +938,9 @@ module ControlUnit (
 
             //Execution: Branch instruction (brpl and brmi)
             br3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Gra <= 1; //selecting the register Ra
                 Rout <= 1; //outputting the value onto the bus
                 CONin <= 1; //triggering the CON_FF evaluation
@@ -748,6 +950,7 @@ module ControlUnit (
                 Gra <= 0; 
                 Rout <= 0;
                 CONin <= 0;
+
                 PCout <= 1; //outputing the PC value onto the bus
                 Yin <= 1; //taking the value from the bus into Y
             end
@@ -755,6 +958,7 @@ module ControlUnit (
             br5: begin
                 PCout <= 0; 
                 Yin <= 0;
+
                 Cout <= 1; //outputing the constant value onto the bus
                 ADD <= 1; //calling the ADD operation in the ALU
                 Zin <= 1; //the ALU result is stored in the Z register
@@ -764,6 +968,7 @@ module ControlUnit (
                 Cout <= 0;
                 ADD  <= 0;
                 Zin  <= 0;
+
                 if (CON_FF)
                     Zlowout <= 1; //branch taken
                 else
@@ -773,12 +978,16 @@ module ControlUnit (
             br7: begin
                 Zlowout <= 0;
                 IncPC   <= 0;
+
                 if (CON_FF)
                     PCin <= 1;
             end
             
             //Execution: JR instruction
             jr3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Gra <= 1; //selecting the source register
                 Rout <= 1; //outputting its value onto the bus
                 PCin <= 1; //loading its value into the PC
@@ -786,12 +995,19 @@ module ControlUnit (
 
             //Execution: JAL instruction
             jal3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 PCout <= 1; //outputting the current PC 
                 Grb <= 1; //selecting Rb for the return address
                 Rin <= 1; //saving this return address at R8
             end
 
             jal4: begin
+                PCout <= 0;
+                Grb <= 0;
+                Rin <= 0;
+
                 Gra <= 1; //selecting Ra from the instruction
                 Rout <= 1; //output the selected register's contents onto bus
                 PCin <= 1; //loading the PC with the new subroutine address
@@ -799,6 +1015,9 @@ module ControlUnit (
 
             //Execution: MFHI instruction
             mfhi3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 HIout <= 1; //placing the HI register value onto the bus
                 Gra <= 1; //selecting the destination register 
                 Rin <= 1; //loading the bus value into the destination reg
@@ -806,6 +1025,9 @@ module ControlUnit (
 
             //Execution: MFLO instruction
             mflo3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 LOout <= 1; //outputting LO register onto the bus
                 Gra <= 1; //selecting the destination register
                 Rin <= 1; //writing the bus value into the destination reg
@@ -813,28 +1035,45 @@ module ControlUnit (
 
             //Execution: LD instruction
             ld3: begin
+			    MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the base register
                 Rout <= 1; //putting the register Rb on bus
                 Yin <= 1; //loading the value of Rb into Y register
             end
 
             ld4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Cout <= 1; //outputting the constant
                 ADD <= 1; //the ALU will add Y + C
                 Zin <= 1; //storing the ADD result into Z
             end
 
             ld5: begin
+                Cout <= 0;
+                ADD <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the lower 32 bits of address (result)
                 MARin <= 1; //loading the MAR with resultling address
             end
 
             ld6: begin
+                Zlowout <= 0;
+                MARin <= 0;
+
                 Read <= 1; //start the memory read cycle
                 MDRin <= 1; //loading the value from RAM into MDR
             end
 
             ld7: begin
+                Read <= 0;
+                MDRin <= 0;
+
                 MDRout <= 1; //outputting the MDR value onto the bus
                 Gra <= 1; //selecting the destination register
                 Rin <= 1; //storing memory value into the destination reg
@@ -842,28 +1081,45 @@ module ControlUnit (
 
             //Execution: LDI instruction
             ldi3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the base register: Rb
                 Rout <= 1; //outputting Rb's value onto the bus
                 Yin <= 1; //store it's value into Y
             end
 
             ldi4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Cout <= 1; //outputting the constant
                 ADD <= 1; //perform the ADD operation on Y + C
                 Zin <= 1; //storing the result in Z
             end
 
             ldi5: begin
+                Cout <= 0;
+                ADD <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //output computed address
                 MARin <= 1; //loading it into MAR
             end
 
             ldi6: begin
+                Zlowout <= 0;
+                MARin <= 0;
+
                 Read <= 1; //triggering the read operation
                 MDRin <= 1; //loading the value at that address from memory into MDR
             end
 
             ldi7: begin
+                Read <= 0;
+                MDRin <= 0;
+
                 MDRout <= 1; //outputting the value of MDR
                 Gra <= 1; //selecting the destination register
                 Rin <= 1; //storeing the value on the bus into the destination reg
@@ -871,29 +1127,47 @@ module ControlUnit (
 
             //Execution: ST instruction
             st3: begin
+				MDRout <= 0;
+				IRin <= 0;
+				
                 Grb <= 1; //selecting the base register (Rb)
                 Rout <= 1; //outputting the base register's value onto the bus
                 Yin <= 1; //storing the value in the Y reg
             end
 
             st4: begin
+                Grb <= 0;
+                Rout <= 0;
+                Yin <= 0;
+
                 Cout <= 1; //outputting the offset
                 ADD <= 1; //using the ADD operation in the ALU to compute Y + C
                 Zin <= 1; //storing this new computed address in Z
             end
 
             st5: begin
+                Cout <= 0;
+                ADD <= 0;
+                Zin <= 0;
+
                 Zlowout <= 1; //outputting the calculated address onto the bus
                 MARin <= 1; //loading into MAR
             end
 
             st6: begin
+                Zlowout <= 0;
+                MARin <= 0;
+
                 Gra <= 1; //selecting the source register
                 Rout <= 1; //outputting its value to bus
                 MDRin <= 1; //loading the value from the bus into MDR
             end
 
             st7: begin
+                Gra <= 0;
+                Rout <= 0;
+                MDRin <= 0;
+
                 Write <= 1; //writing the MDR value to RAM at computed address
             end
 
