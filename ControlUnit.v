@@ -1171,6 +1171,10 @@ module ControlUnit (
                 Write <= 1; //writing the MDR value to RAM at computed address
             end
 
+            halt3: begin
+                HALT <= 1;
+            end 
+
 		 endcase
 	end
 
