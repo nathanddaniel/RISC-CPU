@@ -87,7 +87,7 @@ module ALU(
 				end
 				
 				default: begin
-					Z      <= 64'd0;
+					Z <= 64'd0;
 				end
 				
 			endcase
@@ -95,10 +95,10 @@ module ALU(
 
 	logicalAND logicalAnd(A, B, and_result);
 	logicalOR 	logical_or(A, B, or_result);
-	RCA 		add(A, B, add_result);
-	sub 	sub(A, B, sub_result);
-	booth_multiplier 		mul(A, B, mul_result);
-	division		div(A, B, div_result);
+	RCA add(A, B, add_result);
+	sub sub(A, B, sub_result);
+	booth_multiplier mul(A, B, mul_result);
+	division div(A, B, div_result);
 	rightShift rightShift(A, B, shr_result);
 	rightShiftA rightShiftA(A, B, shra_result);
 	leftShift leftShift(A, B, shl_result);
