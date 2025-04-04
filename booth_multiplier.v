@@ -1,6 +1,6 @@
 module booth_multiplier (
     input wire signed [31:0] a,  // Multiplicand (signed 32-bit)
-    input wire signed [31:0] b,  // Multiplier  (signed 32-bit)
+    input wire signed [31:0] b,  // Multiplier (signed 32-bit)
     output reg signed [63:0] Z   // 64-bit product (hi:lo)
 );
     reg signed [31:0] A;  
