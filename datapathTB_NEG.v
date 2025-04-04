@@ -2,10 +2,10 @@
 module datapathTB_NEG;
 	reg	PCout, ZHighout, Zlowout, MDRout, R0out, R2out, R3out, R4out, R5out, R6out, R7out;
 	reg	MARin, PCin, MDRin, IRin, Yin;
-	reg 	IncPC, Read;
-	reg 	[4:0] NEG; 
-	reg 	R0in, R1in, R2in, R3in;
-	reg   R4in, R5in, R6in, R7in, R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in;
+	reg IncPC, Read;
+	reg [4:0] NEG; 
+	reg R0in, R1in, R2in, R3in;
+	reg R4in, R5in, R6in, R7in, R8in, R9in, R10in, R11in, R12in, R13in, R14in, R15in;
 	reg	HIin, LOin, ZHighIn, ZLowIn, Cin;
 	reg	Clock, Clear;	
 	reg	[31:0] Mdatain;
@@ -78,16 +78,16 @@ end
 always @(posedge Clock)
 begin
 	case (Present_state)
-		Default			:	#40 Present_state = Reg_load1a;
-		Reg_load1a		:	#40 Present_state = Reg_load1b;
-		Reg_load1b		:	#40 Present_state = Reg_load2a;
-		Reg_load2a	   :  #40 Present_state = Reg_load2b;
-		Reg_load2b     :  #40 Present_state = T0;
-		T0					:	#40 Present_state = T1;
-		T1					:	#40 Present_state = T2;
-		T2					:	#40 Present_state = T3;
-		T3					:	#40 Present_state = T4;
-		T4				   :  #40 Present_state = T5;
+		Default : #40 Present_state = Reg_load1a;
+		Reg_load1a : #40 Present_state = Reg_load1b;
+		Reg_load1b : #40 Present_state = Reg_load2a;
+		Reg_load2a : #40 Present_state = Reg_load2b;
+		Reg_load2b : #40 Present_state = T0;
+		T0 : #40 Present_state = T1;
+		T1 : #40 Present_state = T2;
+		T2 : #40 Present_state = T3;
+		T3 : #40 Present_state = T4;
+		T4 : #40 Present_state = T5;
 	endcase
 end
 

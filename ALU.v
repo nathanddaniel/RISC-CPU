@@ -17,73 +17,61 @@ module ALU(
 	always @(*)
 		begin
 			case (opcode)
-
-				Logical_AND: begin // 3.1
+				Logical_AND: begin 
 					Z[31:0] <= and_result[31:0];
-					Z[63:32] <= 32'd0;
-					
+					Z[63:32] <= 32'd0;	
 				end
 				
-				Logical_OR: begin // 3.2
-					Z[31:0] <= or_result[31:0];
-					
+				Logical_OR: begin 
+					Z[31:0] <= or_result[31:0];	
 				end
 				
-				Addition: begin // 3.3
+				Addition: begin
 					Z[31:0] <= add_result[31:0];
-					Z[63:32] <= 32'd0;
-					
+					Z[63:32] <= 32'd0;	
 				end
 				
-				Subtraction: begin // 3.4
-					Z[31:0] <= sub_result[31:0];
-					
+				Subtraction: begin 
+					Z[31:0] <= sub_result[31:0];	
 				end
 				
-				Multiply: begin // 3.5
+				Multiply: begin
 					Z[31:0] <= mul_result[31:0];
 					Z[63:32] <= mul_result[63:32];
 				end
 				
-				Division: begin // 3.6
+				Division: begin 
 					Z[31:0] <= div_result[31:0];
 					Z[63:32] <= div_result[63:32];
 				end
 				
-				Shift_R: begin // 3.7
-					Z[31:0] <= shr_result[31:0];
-					
+				Shift_R: begin
+					Z[31:0] <= shr_result[31:0];	
 				end
 				
-				Shift_Right_A: begin // 3.8
-					Z[31:0] <= shra_result[31:0];
-					
+				Shift_Right_A: begin
+					Z[31:0] <= shra_result[31:0];	
 				end
 				
-				Shift_L: begin // 3.9
-					Z[31:0] <= shl_result[31:0];
-					
+				Shift_L: begin
+					Z[31:0] <= shl_result[31:0];	
 				end
 
-				Rotate_R: begin // 3.10
+				Rotate_R: begin 
 					Z[31:0] <= ror_result[31:0];
-					Z[63:32] <= 32'd0;
-					
+					Z[63:32] <= 32'd0;	
 				end
 	
-				Rotate_L: begin // 3.11
-					Z[31:0] <= rol_result[31:0];
-					
+				Rotate_L: begin 
+					Z[31:0] <= rol_result[31:0];	
 				end
 				
-				Negate: begin // 3.12
+				Negate: begin 
 					Z[31:0] <= neg_result[31:0];
-					
 				end
 
-				Not: begin // 3.13
+				Not: begin 
 					Z[31:0] <= not_result[31:0];
-					
 				end
 				
 				default: begin
@@ -94,7 +82,7 @@ module ALU(
 	end
 
 	logicalAND logicalAnd(A, B, and_result);
-	logicalOR 	logical_or(A, B, or_result);
+	logicalOR logical_or(A, B, or_result);
 	RCA add(A, B, add_result);
 	sub sub(A, B, sub_result);
 	booth_multiplier mul(A, B, mul_result);
@@ -105,7 +93,6 @@ module ALU(
 	rightRotate rightRotate(A, B, ror_result);
 	leftRotate leftRotate(A, B, rol_result);
 	neg	neg(A, neg_result);
-	not_operation 	not_operation(A, not_result);
-
+	not_operation not_operation(A, not_result);
 
 endmodule
