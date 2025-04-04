@@ -42,7 +42,7 @@ module ControlUnit (
     output reg PCout, MDRout,
     output reg Zhighout, Zlowout,
     output reg HIout, LOout,
-	 output reg IncPC
+	output reg IncPC
 );
 
 	//defining state parameters for FSM
@@ -135,40 +135,40 @@ module ControlUnit (
     not4 = 8'b00110011, 
     not5 = 8'b00110100,
 
-    //Branch Instructions
+    //branch Instructions
     br3 = 8'b00110101, 
     br4 = 8'b00110110, 
     br5 = 8'b00110111, 
     br6 = 8'b00111000, 
     br7 = 8'b00111001,  
 
-    //Jump Instructions (JR, JAR)
+    //jump Instructions (JR, JAR)
     jr3 = 8'b00111010, 
     jal3 = 8'b00111011, 
     jal4 = 8'b00111100,
 
-	//Load (LD) Instruction
+	//load (LD) Instruction
     ld3 = 8'b00111101, 
     ld4 = 8'b00111110, 
     ld5 = 8'b00111111, 
     ld6 = 8'b01000000, 
     ld7 = 8'b01000001,
 
-	//Load Immediate (LDI)
+	//load Immediate (LDI)
     ldi3 = 8'b01000010, 
     ldi4 = 8'b01000011, 
     ldi5 = 8'b01000100,
     ldi6 = 8'b01000101, 
     ldi7 = 8'b01000110,
 
-	//Store (ST) Instruction
+	//store (ST) Instruction
     st3 = 8'b01000111, 
     st4 = 8'b01001000, 
     st5 = 8'b01001001, 
     st6 = 8'b01001010, 
     st7 = 8'b01001011,
 
-	//Move From HI/LO
+	//move From HI/LO
     mfhi3 = 8'b01001100, 
     mflo3 = 8'b01001101,
 
@@ -176,207 +176,207 @@ module ControlUnit (
     in3 = 8'b01001110, 
     out3 = 8'b01001111,
 
-    // Special Instructions
+    //special instructions
     nop3  = 8'b01010000, 
     halt3 = 8'b01010001; 
 
-	// Register to store current state
-	reg [8:0] present_state = reset_state;  
+	//register to store current state
+	reg [7:0] present_state = reset_state;  
 
 	// FSM - State Transition Logic
 	always @(posedge Clock or posedge Reset)  
 	begin
-		 if (Reset) 
-			  present_state <= reset_state;
+		 if (Reset == 1'b1) 
+			  present_state = reset_state;
 		 else 
-			  
 			  case (present_state)
-					reset_state	: present_state <= fetch0;
-					fetch0 : present_state <= fetch1;
-					fetch1 : present_state <= fetch2;
+					reset_state	: present_state = fetch0;
+					fetch0 : present_state = fetch1;
+					fetch1 : present_state = fetch2;
 					fetch2 : begin
 					
 							 case (IR[31:27])
 								  // ALU and Operation Instructions
-								  5'b00011: present_state <= add3; //ADD
-								  5'b00100: present_state <= sub3; //SUB
-								  5'b00101: present_state <= and3; //AND
-								  5'b00110: present_state <= or3;  //OR
-								  5'b00111: present_state <= ror3; //ROR
-								  5'b01000: present_state <= rol3; //ROL
-								  5'b01001: present_state <= shr3; //SHR
-								  5'b01010: present_state <= shra3; //SHRA
-								  5'b01011: present_state <= shl3; //SHL
+								  5'b00011: present_state = add3; //ADD
+								  5'b00100: present_state = sub3; //SUB
+								  5'b00101: present_state = and3; //AND
+								  5'b00110: present_state = or3;  //OR
+								  5'b00111: present_state = ror3; //ROR
+								  5'b01000: present_state = rol3; //ROL
+								  5'b01001: present_state = shr3; //SHR
+								  5'b01010: present_state = shra3; //SHRA
+								  5'b01011: present_state = shl3; //SHL
 
-								  5'b01100: present_state <= addi3; //ADDI
-								  5'b01101: present_state <= andi3; //ANDI
-								  5'b01110: present_state <= ori3; //ORI
+								  5'b01100: present_state = addi3; //ADDI
+								  5'b01101: present_state = andi3; //ANDI
+								  5'b01110: present_state = ori3; //ORI
 
-								  5'b01111: present_state <= div3; //DIV
-								  5'b10000: present_state <= mul3; //MUL
-								  5'b10001: present_state <= neg3; //NEG
-								  5'b10010: present_state <= not3; //NOT
+								  5'b01111: present_state = div3; //DIV
+								  5'b10000: present_state = mul3; //MUL
+								  5'b10001: present_state = neg3; //NEG
+								  5'b10010: present_state = not3; //NOT
 
 								  // Branch and Jump Instructions
-								  5'b10011: present_state <= br3; //Branch
-								  5'b10100: present_state <= jal3; //JAR
-								  5'b10101: present_state <= jr3; //JR
+								  5'b10011: present_state = br3; //Branch
+								  5'b10100: present_state = jal3; //JAR
+								  5'b10101: present_state = jr3; //JR
 
 								  // I/O Instructions
-								  5'b10110: present_state <= in3; //IN
-								  5'b10111: present_state <= out3; //OUT
+								  5'b10110: present_state = in3; //IN
+								  5'b10111: present_state = out3; //OUT
 
 								  // Move from HI/LO
-								  5'b11000: present_state <= mflo3; //MFLO
-								  5'b11001: present_state <= mfhi3; //MFHI
+								  5'b11000: present_state = mflo3; //MFLO
+								  5'b11001: present_state = mfhi3; //MFHI
 
 								  // Load/Store Instructions
-								  5'b00000: present_state <= ld3; //LD
-								  5'b00001: present_state <= ldi3; //LDI
-								  5'b00010: present_state <= st3; //ST
+								  5'b00000: present_state = ld3; //LD
+								  5'b00001: present_state = ldi3; //LDI
+								  5'b00010: present_state = st3; //ST
 
-								  default: present_state <= reset_state;
+								  default: present_state = reset_state;
 							 endcase
 					end
 					
-					//add instruction
-					add3: present_state <= add4;
-					add4: present_state <= add5;
-					add5: present_state <= reset_state;
-					
-					//sub instruction
-					sub3: present_state <= sub4;
-					sub4: present_state <= sub5;
-					sub5: present_state <= reset_state;
+                    //add instruction
+                    add3: present_state = add4;
+                    add4: present_state = add5;
+                    add5: present_state = reset_state;
+                        
+                    //sub instruction
+                    sub3: present_state = sub4;
+                    sub4: present_state = sub5;
+                    sub5: present_state = reset_state;
 
                     //and instruction
-					and3: present_state <= and4;
-					and4: present_state <= and5;
-					and5: present_state <= reset_state;
+                    and3: present_state = and4;
+                    and4: present_state = and5;
+                    and5: present_state = reset_state;
 
                     //or instruction
-					or3: present_state <= or4;
-					or4: present_state <= or5;
-					or5: present_state <= reset_state;
+                    or3: present_state = or4;
+                    or4: present_state = or5;
+                    or5: present_state = reset_state;
 
                     //ror instruction
-					ror3: present_state <= ror4;
-					ror4: present_state <= ror5;
-					ror5: present_state <= reset_state;
+                    ror3: present_state = ror4;
+                    ror4: present_state = ror5;
+                    ror5: present_state = reset_state;
 
                     //rol instruction
-					rol3: present_state <= rol4;
-					rol4: present_state <= rol5;
-					rol5: present_state <= reset_state;
+                    rol3: present_state = rol4;
+                    rol4: present_state = rol5;
+                    rol5: present_state = reset_state;
 
                     //shr instruction
-					shr3: present_state <= shr4;
-					shr4: present_state <= shr5;
-					shr5: present_state <= reset_state;
+                    shr3: present_state = shr4;
+                    shr4: present_state = shr5;
+                    shr5: present_state = reset_state;
 
                     //shra instruction
-                    shra3: present_state <= shra3;
-                    shra4: present_state <= shra4;
-                    shra5: present_state <= reset_state;
-					
-					//shl instruction
-					shl3: present_state <= shl4;
-					shl4: present_state <= shl5;
-					shl5: present_state <= reset_state;
+                    shra3: present_state = shra3;
+                    shra4: present_state = shra5;
+                    shra5: present_state = reset_state;
+                        
+                    //shl instruction
+                    shl3: present_state = shl4;
+                    shl4: present_state = shl5;
+                    shl5: present_state = reset_state;
 
                     //addi instruction
-					addi3: present_state <= addi4;
-					addi4: present_state <= addi5;
-					addi5: present_state <= reset_state;
+                    addi3: present_state = addi4;
+                    addi4: present_state = addi5;
+                    addi5: present_state = reset_state;
 
-					//andi instruction
-					andi3: present_state <= andi4;
-					andi4: present_state <= andi5;
-					andi5: present_state <= reset_state;
+                    //andi instruction
+                    andi3: present_state = andi4;
+                    andi4: present_state = andi5;
+                    andi5: present_state = reset_state;
 
-					//ori instruction
-					ori3: present_state <= ori4;
-					ori4: present_state <= ori5;
-					ori5: present_state <= reset_state;
+                    //ori instruction
+                    ori3: present_state = ori4;
+                    ori4: present_state = ori5;
+                    ori5: present_state = reset_state;
 
                     //div instruction
-					div3: present_state <= div4;
-					div4: present_state <= div5;
-					div5: present_state <= div6;
-					div6: present_state <= reset_state;
-					
-					//mul instruction
-					mul3: present_state <= mul4;
-					mul4: present_state <= mul5;
-					mul5: present_state <= reset_state;
-								
-					//neg instruction
-					neg3: present_state <= neg4;
-					neg4: present_state <= neg5;
-					neg5: present_state <= reset_state;
-					
-					//not instruction
-					not3: present_state <= not4;
-					not4: present_state <= not5;
-					not5: present_state <= reset_state;
+                    div3: present_state = div4;
+                    div4: present_state = div5;
+                    div5: present_state = div6;
+                    div6: present_state = reset_state;
+                        
+                    //mul instruction
+                    mul3: present_state = mul4;
+                    mul4: present_state = mul5;
+                    mul5: present_state = reset_state;
+                                    
+                    //neg instruction
+                    neg3: present_state = neg4;
+                    neg4: present_state = neg5;
+                    neg5: present_state = reset_state;
+                        
+                    //not instruction
+                    not3: present_state = not4;
+                    not4: present_state = not5;
+                    not5: present_state = reset_state;
 
                     //branching instructions
-					br3: present_state <= br4;
-					br4: present_state <= br5;
-					br5: present_state <= br6;
-					br6: present_state <= br7;
-					br7: present_state <= reset_state;
+                    br3: present_state = br4;
+                    br4: present_state = br5;
+                    br5: present_state = br6;
+                    br6: present_state = br7;
+                    br7: present_state = reset_state;
 
-					// JR Instruction
-                    jr3: present_state <= reset_state;
+                    //JR Instruction
+                    jr3: present_state = reset_state;
 
-                    // JAL Instruction
-                    jal3: present_state <= jal4;
-                    jal4: present_state <= reset_state;
-					
-					//ld instruction
-					ld3: present_state <= ld4;
-					ld4: present_state <= ld5;
-					ld5: present_state <= ld6;
-					ld6: present_state <= ld7;
-					ld7: present_state <= reset_state;
-					
-					//ldi instruction
-					ldi3: present_state <= ldi4;
-					ldi4: present_state <= ldi5;
-                    ldi5: present_state <= ldi6;
-                    ldi6: present_state <= ldi7;
-					ldi7: present_state <= reset_state;
-					
-					//st instruction
-					st3: present_state <= st4;
-					st4: present_state <= st5;
-					st5: present_state <= st6;
-					st6: present_state <= st7;
-					st7: present_state <= reset_state;
-					
-					// MFHI / MFLO
-					mfhi3: present_state <= reset_state;
-					mflo3: present_state <= reset_state;
+                    //JAL Instruction
+                    jal3: present_state = jal4;
+                    jal4: present_state = reset_state;
+                        
+                    //ld instruction
+                    ld3: present_state = ld4;
+                    ld4: present_state = ld5;
+                    ld5: present_state = ld6;
+                    ld6: present_state = ld7;
+                    ld7: present_state = reset_state;
+                        
+                    //ldi instruction
+                    ldi3: present_state = ldi4;
+                    ldi4: present_state = ldi5;
+                    ldi5: present_state = ldi6;
+                    ldi6: present_state = ldi7;
+                    ldi7: present_state = reset_state;
+                        
+                    //st instruction
+                    st3: present_state = st4;
+                    st4: present_state = st5;
+                    st5: present_state = st6;
+                    st6: present_state = st7;
+                    st7: present_state = reset_state;
+                        
+                    //MFHI/MFLO instruction
+                    mfhi3: present_state = reset_state;
+                    mflo3: present_state = reset_state;
 
-					// IN / OUT
-					in3: present_state <= reset_state;
-					out3: present_state <= reset_state;
+                    //IN/OUT instruction
+                    in3: present_state = reset_state;
+                    out3: present_state = reset_state;
 
-					// NOP
-					nop3: present_state <= reset_state;
+                    //NOP instruction
+                    nop3: present_state = reset_state;
 
-					// HALT
-					halt3: present_state <= halt3; //looping forever in HALT
+                    //HALT instruction
+                    halt3: present_state = halt3; //looping forever in HALT
 
-					default: present_state <= reset_state;
-			  endcase
+                    //default instruction
+                    default: present_state = reset_state;
+			endcase
 	end
 
 	// FSM - Control Signal Assignments
 	always @(present_state)  
 	begin
-		 // Default de-assert all signals
+		 //default de-assert all signals
 		 Gra <= 0; 			Grb <= 0; 		 Grc <= 0; 			Rin <= 0; 			Rout <= 0;
 		 BAout <= 0; 		Cout <= 0;		 Read <= 0; 		Write <= 0; 		MARin <= 0; 
 		 MDRin <= 0; 		MDRout <= 0;	 PCin <= 0; 		PCout <= 0; 		IRin <= 0; 
@@ -391,9 +391,9 @@ module ControlUnit (
 		 NOP <= 0; 			HALT <= 0;
 
 		 case (present_state)
-			  // Reset state: initialize everything
+			// Reset state: initialize everything
 			reset_state: begin	
-				// Default de-assert all signals
+				//default de-assert all signals
                 Gra <= 0; 			Grb <= 0; 		 Grc <= 0; 			Rin <= 0; 			Rout <= 0;
                 BAout <= 0; 		Cout <= 0;		 Read <= 0; 		Write <= 0; 		MARin <= 0; 
                 MDRin <= 0; 		MDRout <= 0;	 PCin <= 0; 		PCout <= 0; 		IRin <= 0; 
@@ -417,6 +417,7 @@ module ControlUnit (
 				PCout <= 1; //outputting the PC's value onto the bus
 				MARin <= 1; //loading the bus value into MAR
 				IncPC <= 1; //incrementing the PC internally  
+				Zin <= 1;
 			end
 			  
 			fetch1: begin
