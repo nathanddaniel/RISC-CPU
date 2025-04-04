@@ -1,12 +1,20 @@
+/* 
+
+Testbench for verifying the full DataPath module in Phase 3. This module 
+instantiates the DataPath, generates a clock signal, and triggers the 
+control FSM by asserting the Run signal. 
+
+*/
 
 module DataPath_tb;
 
+  //signal declarations
   reg clock, clear;
   reg Run, Interrupts;
   reg [31:0] InPortData;
   wire [31:0] OutPortData;
 
-  // Instantiate the datapath
+  //instantiate the datapath
   DataPath uut (
     .clock(clock),
     .clear(clear),
@@ -16,24 +24,23 @@ module DataPath_tb;
     .OutPortData(OutPortData)
   );
 
+  //clock generator (20ns clock period, 50MHz)
   initial begin
     clock = 0;
-    forever #10 clock = ~clock;  // 20ns clock period
+    forever #10 clock = ~clock; 
   end
 
+  //test sequence
   initial begin
     // Reset the CPU
     clear = 1; Run = 0; Interrupts = 0;
     #25 clear = 0;
 
-    // Start running the program
-    Run = 1;
+    Run = 1;  //start running the program
 
-    // Allow some cycles to pass
-    #1000;
+    #20000;   //allow some cycles to pass
 
-    // Halt the simulation
-    $finish;
+    $finish;  //halting the simulation
   end
 
 endmodule

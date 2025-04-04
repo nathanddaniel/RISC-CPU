@@ -47,7 +47,8 @@ module ControlUnit (
 
 	//defining state parameters for FSM
 	//basically creating set of states for each part of the instruction processing
-	//provides a framework for the FSM to transition between states and helps assign control signals cleanly in a case(present_state) block
+	//provides a framework for the FSM to transition between states and helps assign control 
+    //signals cleanly in a case(present_state) block
 	parameter 
     reset_state = 8'b00000000, 
     fetch0 = 8'b00000001, 
@@ -376,20 +377,6 @@ module ControlUnit (
 	// FSM - Control Signal Assignments
 	always @(present_state)  
 	begin
-		 //default de-assert all signals
-		 Gra <= 0; 			Grb <= 0; 		 Grc <= 0; 			Rin <= 0; 			Rout <= 0;
-		 BAout <= 0; 		Cout <= 0;		 Read <= 0; 		Write <= 0; 		MARin <= 0; 
-		 MDRin <= 0; 		MDRout <= 0;	 PCin <= 0; 		PCout <= 0; 		IRin <= 0; 
-		 IncPC <= 0;		Yin <= 0; 		 Zin <= 0; 			Zhighout <= 0; 	Zlowout <= 0;
-		 HIin <= 0; 		LOin <= 0; 		 HIout <= 0; 		LOout <= 0;			CONin <= 0; 
-		 Clear <= 0;		ADD <= 0; 		 SUB <= 0; 			AND <= 0; 
-		 OR <= 0;			SHR <= 0; 		 SHRA <= 0; 		SHL <= 0; 			ROL <= 0; 
-		 ROR <= 0;			ADDI <= 0; 		 ANDI <= 0; 		ORI <= 0;			DIV <= 0; 
-		 MUL <= 0; 			NEG <= 0; 		 NOT <= 0;			BRZR <= 0; 			BRNZ <= 0; 
-		 BRMI <= 0; 		BRPL <= 0;		 JAR <= 0; 			JR <= 0;				IN <= 0; 
-		 OUT <= 0; 			InPortout <= 0; OutPortin <= 0;	MFLO <= 0; 			MFHI <= 0; 
-		 NOP <= 0; 			HALT <= 0;
-
 		 case (present_state)
 			// Reset state: initialize everything
 			reset_state: begin	
